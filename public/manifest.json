@@ -1,22 +1,55 @@
 {
-  "name": "My Awesome PWA app",
-  "short_name": "PWA App",
+  "name": "King of English",
+  "short_name": "King Of English",
+  "description": "Test your vocabulary skills with this engaging quiz app.",
   "icons": [
     {
-      "src": "/icons/android-chrome-192x192.png",
-      "sizes": "192x192",
+      "src": "/images/android-launchericon-48-48.png",
       "type": "image/png",
+      "sizes": "48x48"
+    },
+    {
+      "src": "/images/android-launchericon-72-72.png",
+      "type": "image/png",
+      "sizes": "72x72"
+    },
+    {
+      "src": "/images/android-launchericon-96-96.png",
+      "type": "image/png",
+      "sizes": "96x96"
+    },
+    {
+      "src": "/images/android-launchericon-144-144.png",
+      "type": "image/png",
+      "sizes": "144x144"
+    },
+    {
+      "src": "/images/android-launchericon-192-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/images/icon.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "/images/maskable-icon.png",
+      "type": "image/png",
+      "sizes": "512x512",
       "purpose": "maskable"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "/images/icon.png",
+      "type": "image/png",
       "sizes": "512x512",
-      "type": "image/png"
+      "purpose": "any"
     }
   ],
-  "theme_color": "#FFFFFF",
-  "background_color": "#FFFFFF",
   "start_url": "/",
+  "orientation": "portrait",
   "display": "standalone",
-  "orientation": "portrait"
+  "theme_color": "#0a305a",
+  "background_color": "#0a305a",
+  "scope": "/"
 }
