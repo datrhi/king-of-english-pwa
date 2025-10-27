@@ -1,0 +1,32 @@
+/* font for Konsta UI */
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap");
+@import "tailwindcss";
+/* import Konsta UI theme */
+@import "konsta/react/theme.css";
+
+html,
+body,
+#__next {
+  height: 100%;
+}
+#__next {
+  margin: 0 auto;
+}
+h1 {
+  text-align: center;
+}
+
+/* Hide scrollbar but keep scroll enabled */
+::-webkit-scrollbar {
+  display: none;
+}
+html,
+body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  overscroll-behavior-y: none;
+}
+
+.no-overscroll {
+  overscroll-behavior-y: none;
+}
