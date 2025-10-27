@@ -95,7 +95,6 @@ export function useTransitionRouter() {
       triggerTransition(
         () => {
           router.back();
-          setHistory((prev) => prev.slice(0, -1));
         },
         {
           onTransitionReady: onTransitionReady || backAnimation,

@@ -1,7 +1,7 @@
 import KonstaWrapper from "@/components/KonstaWrapper";
 import { ViewTransitions } from "@/lib/next-view-transitions";
 import type { Metadata, Viewport } from "next";
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import "./globals.css";
 import Head from "./head";
 

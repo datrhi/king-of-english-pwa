@@ -1,8 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 import { createContext, use, useEffect, useState } from "react";
 
-// import { useBrowserNativeTransitions } from './browser-native-events'
-
 const ViewTransitionsContext = createContext<{
   setFinishViewTransition: Dispatch<SetStateAction<null | (() => void)>>;
   setHistory: Dispatch<SetStateAction<string[]>>;
@@ -25,13 +23,17 @@ export function ViewTransitions({
   const [history, setHistory] = useState<string[]>([]);
 
   useEffect(() => {
+    const onPopState = () => setHistory((h) => h.slice(0, -1));
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  useEffect(() => {
     if (finishViewTransition) {
       finishViewTransition();
       setFinishViewTransition(null);
     }
   }, [finishViewTransition]);
-
-  // useBrowserNativeTransitions()
 
   return (
     <ViewTransitionsContext.Provider
