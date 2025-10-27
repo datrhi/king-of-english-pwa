@@ -12,7 +12,8 @@ export default function Header(props: Props) {
   const pathname = usePathname();
   const isCanBack = router.history.length > 0;
   const isSignedIn = false; // Placeholder for future authentication logic
-  const isSignInRoute = pathname === "/signin";
+  const isAuthenticationRoute =
+    pathname === "/signin" || pathname === "/signup";
   return (
     <Navbar
       title="King Of English"
@@ -22,7 +23,7 @@ export default function Header(props: Props) {
           <Link iconOnly>
             <CircleUser size={20} />
           </Link>
-        ) : isSignInRoute ? null : (
+        ) : isAuthenticationRoute ? null : (
           <Link onClick={() => router.push("/signin")}>Sign in</Link>
         )
       }

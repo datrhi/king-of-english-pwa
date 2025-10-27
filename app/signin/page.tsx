@@ -42,7 +42,7 @@ export default function SignInPage() {
 
   const handleSignUp = () => {
     // Navigate to sign up page
-    router.push("/signup");
+    router.replace("/signup");
   };
 
   return (
