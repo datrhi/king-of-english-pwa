@@ -39,7 +39,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#fff",
+  // bg-ios-light-surface
+  themeColor: "#efeff4",
   width: "device-width",
   initialScale: 1,
   minimumScale: 1,
@@ -53,7 +54,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <ViewTransitions>
         <html lang="en" dir="ltr">
           <Head />
-          <body>{children}</body>
+          <body data-mode="light">{children}</body>
         </html>
       </ViewTransitions>
     </KonstaWrapper>

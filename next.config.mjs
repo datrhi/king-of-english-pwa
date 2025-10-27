@@ -18,6 +18,16 @@ const withSerwist = withSerwistInit({
 const nextConfig = {
   reactStrictMode: true,
   output: "standalone",
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.langeek.co",
+        port: "",
+        pathname: "/**",
+      },
+    ],
+  },
 };
 
 export default withSerwist(nextConfig);
