@@ -1,8 +1,8 @@
 "use client";
 import ExploreList from "@/components/ExploreList";
-import Header from "@/components/Header";
 import JoinGame from "@/components/JoinGame";
-import { Page, Tabbar, TabbarLink, ToolbarPane } from "konsta/react";
+import ScreenWithBackground from "@/components/ScreenWithBackground";
+import { Tabbar, TabbarLink, ToolbarPane } from "konsta/react";
 import { Compass, Users } from "lucide-react";
 import { useState } from "react";
 
@@ -21,8 +21,12 @@ const Tabs = {
 export default function TabbarPage() {
   const [activeTab, setActiveTab] = useState<"explore" | "join">("explore");
   return (
-    <Page className="no-overscroll">
-      <Header title={Tabs[activeTab].header} />
+    <ScreenWithBackground
+      headerProps={{
+        title: Tabs[activeTab].header
+      }}
+      view="scrollable"
+    >
       <Tabbar labels={true} icons={true} className="left-0 bottom-0 fixed">
         <ToolbarPane>
           <TabbarLink
@@ -41,12 +45,10 @@ export default function TabbarPage() {
       </Tabbar>
 
       {activeTab === "explore" && (
-        <div className="mb-24">
-          <ExploreList />
-        </div>
+        <ExploreList />
       )}
 
       {activeTab === "join" && <JoinGame />}
-    </Page>
-  );
+    </ScreenWithBackground>
+  )
 }

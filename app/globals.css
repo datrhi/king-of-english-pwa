@@ -201,3 +201,30 @@ body {
 .no-overscroll {
   overscroll-behavior-y: none;
 }
+
+/* Dynamic Background Animations */
+@keyframes fall {
+  0% {
+    top: -60px;
+    transform: translateX(-50%) rotate(0deg) scale(0.8);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3;
+    transform: translateX(-50%) rotate(36deg) scale(1);
+  }
+  90% {
+    opacity: 0.2;
+    transform: translateX(-50%) rotate(324deg) scale(1);
+  }
+  100% {
+    top: calc(100vh + 60px);
+    transform: translateX(-50%) rotate(360deg) scale(0.8);
+    opacity: 0;
+  }
+}
+
+.animate-fall {
+  animation-name: fall;
+  will-change: transform, opacity, top;
+}

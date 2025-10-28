@@ -1,6 +1,7 @@
 "use client";
 
 import { Dialog, DialogButton } from "konsta/react";
+import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -245,10 +246,6 @@ export default function ExploreList() {
   const [dialogOpened, setDialogOpened] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<ExploreItem | null>(null);
 
-  // Chia data thành 2 cột như layout gốc
-  const leftColumn = exploreData.filter((_, index) => index < 12);
-  const rightColumn = exploreData.filter((_, index) => index >= 12);
-
   const handleTopicClick = (item: ExploreItem) => {
     setSelectedTopic(item);
     setDialogOpened(true);
@@ -269,54 +266,31 @@ export default function ExploreList() {
   };
 
   return (
-    <div className="container mx-auto flex gap-4 my-6 px-4">
-      {/* Left Column */}
-      <div className="container mx-auto flex flex-col flex-wrap gap-6">
-        {leftColumn.map((item) => (
+    <div className="w-full">
+      {/* FlatList-like container */}
+      <div className="flex flex-col gap-4 p-4 pb-20">
+        {exploreData.map((item) => (
           <div
             key={item.id}
             onClick={() => handleTopicClick(item)}
-            className={`${item.bgClass} ${item.heightClass} [&_h2]:hover:text-purple rounded-3xl text-center row-span flex flex-col items-center justify-center gap-3 hover:bg-blue-light-1 cursor-pointer`}
+            className={`${item.bgClass} w-full h-20 rounded-2xl flex flex-row items-center px-4 gap-4 hover:bg-blue-light-1 cursor-pointer active:scale-[0.98] transition-transform duration-150`}
           >
-            <div className="flex flex-col gap-3 items-center">
-              <div style={{ height: `${item.imgHeight}px` }}>
-                <Image
-                  alt="picture"
-                  className="dark:saturate-[1.2] dark:brightness-75"
-                  src={item.imgSrc}
-                  width={item.imgHeight}
-                  height={item.imgHeight}
-                />
-              </div>
-              <h2 className="font-text-medium text-title text-sm lg:text-base">
+            <div className="flex-shrink-0">
+              <Image
+                alt="picture"
+                className="dark:saturate-[1.2] dark:brightness-75"
+                src={item.imgSrc}
+                width={48}
+                height={48}
+              />
+            </div>
+            <div className="flex-1">
+              <h2 className="font-text-medium text-title text-base font-semibold">
                 {item.name}
               </h2>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Right Column */}
-      <div className="container mx-auto flex flex-col flex-wrap gap-6">
-        {rightColumn.map((item) => (
-          <div
-            key={item.id}
-            onClick={() => handleTopicClick(item)}
-            className={`${item.bgClass} ${item.heightClass} [&_h2]:hover:text-purple rounded-3xl text-center row-span flex flex-col items-center justify-center gap-3 hover:bg-blue-light-1 cursor-pointer`}
-          >
-            <div className="flex flex-col gap-3 items-center">
-              <div style={{ height: `${item.imgHeight}px` }}>
-                <Image
-                  alt="picture"
-                  className="dark:saturate-[1.2] dark:brightness-75"
-                  src={item.imgSrc}
-                  width={item.imgHeight}
-                  height={item.imgHeight}
-                />
-              </div>
-              <h2 className="font-text-medium text-title text-sm lg:text-base">
-                {item.name}
-              </h2>
+            <div className="flex-shrink-0 text-gray-400">
+              <ChevronRight size={16} />
             </div>
           </div>
         ))}

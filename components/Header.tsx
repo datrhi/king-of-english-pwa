@@ -5,7 +5,7 @@ import { Props as NavbarProps } from "konsta/react/types/Navbar";
 import { CircleUser } from "lucide-react";
 import { usePathname } from "next/navigation";
 
-interface Props extends NavbarProps {}
+interface Props extends NavbarProps { }
 
 export default function Header(props: Props) {
   const router = useTransitionRouter();

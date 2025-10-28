@@ -1,4 +1,8 @@
-import { backAnimation, pushAnimation } from "@/utils/router-transitions";
+import {
+  backAnimation,
+  flipClockwiseAnimation,
+  pushAnimation,
+} from "@/utils/router-transitions";
 import {
   AppRouterInstance,
   NavigateOptions,
@@ -83,7 +87,7 @@ export function useTransitionRouter() {
           router.replace(href, options);
         },
         {
-          onTransitionReady,
+          onTransitionReady: onTransitionReady || flipClockwiseAnimation,
         }
       );
     },
