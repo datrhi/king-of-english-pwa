@@ -1,5 +1,6 @@
 "use client";
 
+import { useTransitionRouter } from "@/lib/next-view-transitions";
 import { Dialog, DialogButton } from "konsta/react";
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
@@ -245,6 +246,7 @@ const exploreData: ExploreItem[] = [
 export default function ExploreList() {
   const [dialogOpened, setDialogOpened] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<ExploreItem | null>(null);
+  const router = useTransitionRouter();
 
   const handleTopicClick = (item: ExploreItem) => {
     setSelectedTopic(item);
@@ -254,7 +256,8 @@ export default function ExploreList() {
   const handleConfirm = () => {
     if (selectedTopic) {
       // Mở link trong tab mới
-      window.open(selectedTopic.href, "_blank", "noopener,noreferrer");
+      // window.open(selectedTopic.href, "_blank", "noopener,noreferrer");
+      router.push(`/lobby?topic=${selectedTopic.id}`);
     }
     setDialogOpened(false);
     setSelectedTopic(null);
