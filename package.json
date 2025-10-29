@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@serwist/next": "latest",
+    "@tanstack/react-query": "^5.90.5",
+    "axios": "^1.13.1",
     "framer-motion": "^12.23.24",
     "konsta": "^5.0.3",
     "lucide-react": "^0.548.0",

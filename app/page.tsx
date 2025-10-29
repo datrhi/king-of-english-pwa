@@ -10,7 +10,7 @@ const Tabs = {
   explore: {
     label: "Explore",
     icon: <Compass size={24} />,
-    header: "Explore a category",
+    header: "Explore a course",
   },
   join: {
     label: "Join",
@@ -26,6 +26,7 @@ export default function TabbarPage() {
         title: Tabs[activeTab].header
       }}
       view="scrollable"
+      contentPosition={activeTab === "explore" ? "start" : "center"}
     >
       <Tabbar labels={true} icons={true} className="left-0 bottom-0 fixed">
         <ToolbarPane>

@@ -6,5 +6,6 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=30000
+      - NEXT_PUBLIC_API_URL=https://api-koe.091200.xyz/api
     restart: unless-stopped
     container_name: vocab-pwa-app

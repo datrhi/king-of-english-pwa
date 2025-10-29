@@ -1,4 +1,5 @@
 import KonstaWrapper from "@/components/KonstaWrapper";
+import QueryProvider from "@/providers/QueryProvider";
 import { ViewTransitions } from "@/lib/next-view-transitions";
 import type { Metadata, Viewport } from "next";
 import { type ReactNode } from "react";
@@ -52,10 +53,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <KonstaWrapper>
       <ViewTransitions>
-        <html lang="en" dir="ltr">
-          <Head />
-          <body data-mode="light">{children}</body>
-        </html>
+        <QueryProvider>
+          <html lang="en" dir="ltr">
+            <Head />
+            <body data-mode="light">{children}</body>
+          </html>
+        </QueryProvider>
       </ViewTransitions>
     </KonstaWrapper>
   );
