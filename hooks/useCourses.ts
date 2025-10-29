@@ -1,5 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { coursesApi, type GetCoursesParams } from '@/services/api';
+import { 
+  coursesApi,
+  type GetCoursesParams
+} from '@/services/coursesApi';
 
 export const useCourses = (params?: GetCoursesParams) => {
   return useQuery({
@@ -15,4 +18,3 @@ export const useCourse = (id: string) => {
     enabled: !!id,
   });
 };
-

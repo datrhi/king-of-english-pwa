@@ -1,5 +1,5 @@
 "use client";
-import ExploreList from "@/components/ExploreList";
+import CourseList from "@/components/CourseList";
 import JoinGame from "@/components/JoinGame";
 import ScreenWithBackground from "@/components/ScreenWithBackground";
 import { Tabbar, TabbarLink, ToolbarPane } from "konsta/react";
@@ -46,7 +46,7 @@ export default function TabbarPage() {
       </Tabbar>
 
       {activeTab === "explore" && (
-        <ExploreList />
+        <CourseList />
       )}
 
       {activeTab === "join" && <JoinGame />}
