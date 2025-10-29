@@ -7,6 +7,7 @@ import { Sheet, Toolbar, ToolbarPane, Link, Block, Button, Preloader, Searchbar 
 import { ChevronRight, X } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
+import { shimmer, toBase64 } from "@/utils/shimmer";
 
 interface ExercisesListProps {
   lessonId: string;
@@ -126,6 +127,8 @@ export default function ExercisesList({ lessonId }: ExercisesListProps) {
                   alt={exercise.name}
                   fill
                   className="object-cover"
+                  placeholder="blur"
+                  blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(64, 64))}`}
                 />
               </div>
             )}
@@ -164,6 +167,8 @@ export default function ExercisesList({ lessonId }: ExercisesListProps) {
                 alt={selectedExercise.name}
                 fill
                 className="object-cover"
+                placeholder="blur"
+                blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(700, 475))}`}
               />
             </div>
           )}
