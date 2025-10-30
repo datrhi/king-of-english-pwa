@@ -1,10 +1,10 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import LessonsList from "@/components/LessonsList";
 import ScreenWithBackground from "@/components/ScreenWithBackground";
-import { Suspense } from "react";
 import { Preloader } from "konsta/react";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 function LessonsPageContent() {
   const searchParams = useSearchParams();

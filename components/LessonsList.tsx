@@ -1,13 +1,13 @@
 "use client";
 
-import { useTransitionRouter } from "@/lib/next-view-transitions";
 import { useLessons } from "@/hooks/useLessons";
+import { useTransitionRouter } from "@/lib/next-view-transitions";
 import type { Lesson } from "@/services/lessonsApi";
-import { Sheet, Toolbar, ToolbarPane, Link, Block, Button, Preloader, Searchbar } from "konsta/react";
-import { ChevronRight, X } from "lucide-react";
-import { useState } from "react";
-import Image from "next/image";
 import { shimmer, toBase64 } from "@/utils/shimmer";
+import { Block, Button, Link, Preloader, Searchbar, Sheet, Toolbar, ToolbarPane } from "konsta/react";
+import { ChevronRight, X } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
 
 interface LessonsListProps {
   courseId: string;
@@ -35,7 +35,6 @@ export default function LessonsList({ courseId }: LessonsListProps) {
 
   const handleCloseSheet = () => {
     setSheetOpened(false);
-    setSelectedLesson(null);
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,16 +48,16 @@ export default function LessonsList({ courseId }: LessonsListProps) {
   // Filter lessons based on search query
   const filteredLessons = searchQuery
     ? lessons?.filter((lesson) =>
-        lesson.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        lesson.description?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      lesson.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      lesson.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
     : lessons;
 
   // Show loading state
   if (isLoading) {
     return (
       <div className="w-full flex items-center justify-center py-20">
-       <Preloader />
+        <Preloader />
       </div>
     );
   }
@@ -116,37 +115,37 @@ export default function LessonsList({ courseId }: LessonsListProps) {
           </div>
         ) : (
           filteredLessons?.map((lesson: Lesson, index: number) => (
-          <div
-            key={lesson.id}
-            onClick={() => handleLessonClick(lesson)}
-            className={`${getBgClass(index)} w-full min-h-20 rounded-2xl flex flex-row items-center px-4 gap-4 hover:bg-blue-light-1 cursor-pointer active:scale-[0.98] transition-transform duration-150`}
-          >
-            {lesson.image && (
-              <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden relative">
-                <Image 
-                  src={lesson.image} 
-                  alt={lesson.name}
-                  fill
-                  className="object-cover"
-                  placeholder="blur"
-                  blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(64, 64))}`}
-                />
-              </div>
-            )}
-            <div className="flex-1 py-4">
-              <h2 className="font-text-medium text-title text-base font-semibold">
-                {lesson.name}
-              </h2>
-              {lesson.description && (
-                <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                  {lesson.description}
-                </p>
+            <div
+              key={lesson.id}
+              onClick={() => handleLessonClick(lesson)}
+              className={`${getBgClass(index)} w-full min-h-20 rounded-2xl flex flex-row items-center px-4 gap-4 hover:bg-blue-light-1 cursor-pointer active:scale-[0.98] transition-transform duration-150`}
+            >
+              {lesson.image && (
+                <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden relative">
+                  <Image
+                    src={lesson.image}
+                    alt={lesson.name}
+                    fill
+                    className="object-cover"
+                    placeholder="blur"
+                    blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(64, 64))}`}
+                  />
+                </div>
               )}
+              <div className="flex-1 py-4">
+                <h2 className="font-text-medium text-title text-base font-semibold">
+                  {lesson.name}
+                </h2>
+                {lesson.description && (
+                  <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                    {lesson.description}
+                  </p>
+                )}
+              </div>
+              <div className="flex-shrink-0 text-gray-400">
+                <ChevronRight size={16} />
+              </div>
             </div>
-            <div className="flex-shrink-0 text-gray-400">
-              <ChevronRight size={16} />
-            </div>
-          </div>
           ))
         )}
       </div>
@@ -168,8 +167,8 @@ export default function LessonsList({ courseId }: LessonsListProps) {
         <Block className="ios:mt-4">
           {selectedLesson?.image && (
             <div className="w-full h-48 rounded-lg overflow-hidden mb-4 relative">
-              <Image 
-                src={selectedLesson.image} 
+              <Image
+                src={selectedLesson.image}
                 alt={selectedLesson.name}
                 fill
                 className="object-cover"

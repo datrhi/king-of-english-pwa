@@ -1,13 +1,14 @@
 "use client";
 import {
+    Button,
     Card,
-    Chip,
     Link,
     List,
     ListItem,
-    Popover
+    Popover,
+    Toast
 } from 'konsta/react';
-import { MoreVertical, UserPlus } from 'lucide-react';
+import { MoreVertical } from 'lucide-react';
 import { useRef, useState } from 'react';
 import ScreenWithBackground from './ScreenWithBackground';
 
@@ -40,10 +41,21 @@ export default function Lobby({
     onShare,
 }: Props) {
     const [popoverOpened, setPopoverOpened] = useState(false);
+    const [toastOpened, setToastOpened] = useState(false);
     const popoverTargetRef = useRef(null);
 
     const openPopover = () => {
         setPopoverOpened(true);
+    };
+
+    const copyPinCode = async () => {
+        try {
+            await navigator.clipboard.writeText(pinCode);
+            setToastOpened(true);
+            setTimeout(() => setToastOpened(false), 3000);
+        } catch (err) {
+            console.error('Failed to copy PIN code:', err);
+        }
     };
 
     const handleMenuAction = (action: string) => {
@@ -81,102 +93,102 @@ export default function Lobby({
                 ),
             }}
             view='scrollable'
+            contentPosition='start'
         >
-            <div className="space-y-6 w-full">
+            <div className="space-y-4 w-full">
                 {/* PIN Code Card */}
-                <Card className="text-center bg-white/40 shadow-lg">
-                    <div className="py-6">
-                        <h2 className="text-lg font-medium text-gray-700 mb-2">PIN code:</h2>
-                        <div className="text-4xl font-bold text-green-600 mb-4 tracking-wider">
-                            {pinCode}
+                <Card className="overflow-hidden backdrop-blur-xl bg-white/30 shadow-xl border border-white/40">
+                    <div className="p-6 text-center">
+                        <div className="flex items-center justify-center gap-2 mb-4">
+                            <p className="text-2xl font-bold text-gray-600 tracking-wide">
+                                {category}
+                            </p>
+                        </div>
+                        <p className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3">PIN Code</p>
+                        <div className="inline-block mb-4">
+                            <div onClick={copyPinCode} className="text-5xl font-bold text-primary tracking-widest">
+                                {pinCode}
+                            </div>
                         </div>
                     </div>
                 </Card>
 
                 {/* Players Card */}
-                <Card className="bg-white/40 shadow-lg">
-                    <div className="p-4">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-medium text-gray-800">
-                                {users.length} of {maxPlayers} players:
+                <Card className="overflow-hidden backdrop-blur-xl bg-white/30 shadow-xl border border-white/40">
+                    <div className="p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-lg font-semibold text-gray-700 uppercase tracking-wide">
+                                Players
                             </h3>
                         </div>
 
-                        <div className="flex flex-wrap gap-2">
+                        <div className="grid grid-cols-2 gap-3">
                             {users.map((user) => (
-                                <Chip
+                                <div
                                     key={user.id}
-                                    className="m-0.5 relative"
-                                    colors={{
-                                        fillBgIos: user.isHost ? 'bg-yellow-100' : 'bg-blue-50',
-                                        fillBgMaterial: user.isHost ? 'bg-yellow-100' : 'bg-blue-50',
-                                        fillTextIos: user.isHost ? 'text-yellow-800' : 'text-blue-800',
-                                        fillTextMaterial: user.isHost ? 'text-yellow-800' : 'text-blue-800'
-                                    }}
-                                    media={
-                                        user.avatar ? (
-                                            <img
-                                                alt={`${user.name} avatar`}
-                                                className="ios:h-7 material:h-6 rounded-full"
-                                                src={user.avatar}
-                                            />
-                                        ) : (
-                                            <div className="ios:h-7 material:h-6 w-7 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center">
-                                                <span className="text-white font-bold text-xs">
-                                                    {user.name.charAt(0).toUpperCase()}
-                                                </span>
-                                            </div>
-                                        )
-                                    }
+                                    className={`relative rounded-2xl p-4 transition-all duration-300 backdrop-blur-md ${user.isHost
+                                        ? 'bg-amber-100/80 border border-amber-300/50 shadow-lg'
+                                        : 'bg-white/50 border border-white/60 shadow-md hover:shadow-lg hover:bg-white/60'
+                                        }`}
                                 >
-                                    {user.name}
                                     {user.isHost && (
-                                        <span className="ml-1">👑</span>
-                                    )}
-                                </Chip>
-                            ))}
-
-                            {/* Add empty slots visualization */}
-                            {users.length < maxPlayers && (
-                                <Chip
-                                    className="m-0.5 opacity-50"
-                                    outline
-                                    colors={{
-                                        outlineBorderIos: 'border-gray-300',
-                                        outlineBorderMaterial: 'border-gray-300',
-                                        outlineTextIos: 'text-gray-500',
-                                        outlineTextMaterial: 'text-gray-500'
-                                    }}
-                                    media={
-                                        <div className="ios:h-7 material:h-6 w-7 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center">
-                                            <UserPlus size={12} className="text-gray-400" />
+                                        <div className="absolute -top-2 -right-2 backdrop-blur-md bg-amber-100/90 rounded-full w-8 h-8 flex items-center justify-center shadow-lg border-2 border-white">
+                                            <span className="text-base">👑</span>
                                         </div>
-                                    }
-                                >
-                                    Join game
-                                </Chip>
-                            )}
+                                    )}
+                                    <div className="flex flex-col items-center space-y-2.5">
+                                        {user.avatar ? (
+                                            <div className="relative">
+                                                <div className="absolute inset-0 bg-blue-500/30 blur-md rounded-full"></div>
+                                                <img
+                                                    alt={`${user.name} avatar`}
+                                                    className="relative w-14 h-14 rounded-full border-2 border-white/80 shadow-lg"
+                                                    src={user.avatar}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div className="relative">
+                                                <div className="absolute inset-0 bg-orange-400/40 blur-md rounded-full"></div>
+                                                <div className="relative w-14 h-14 rounded-full bg-orange-500 flex items-center justify-center border-2 border-white/80 shadow-lg">
+                                                    <span className="text-white font-bold text-xl drop-shadow">
+                                                        {user.name.charAt(0).toUpperCase()}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <div className="text-center">
+                                            <p className={`font-semibold text-sm leading-tight ${user.isHost ? 'text-amber-900' : 'text-gray-800'
+                                                }`}>
+                                                {user.name}
+                                            </p>
+                                            {user.isHost && (
+                                                <p className="text-xs text-amber-700 font-medium mt-0.5 uppercase tracking-wide">Host</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
+
+                        {users.length === 0 && (
+                            <div className="text-center py-12">
+                                <div className="inline-block bg-white/50 backdrop-blur-md rounded-2xl px-6 py-4 border border-white/60">
+                                    <p className="text-base text-gray-600 font-medium">Waiting for players to join...</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </Card>
 
-                {/* Category Card */}
-                {/* <Card className="bg-white/90 backdrop-blur-sm">
-                    <div className="p-4">
-                        <h3 className="text-lg font-medium text-gray-800 mb-3">Category:</h3>
-                        <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-4 text-white">
-                            <h4 className="font-bold text-lg">{category}</h4>
-                        </div>
-                    </div>
-                </Card> */}
 
-            </div>
+            </div >
 
             {/* Popover Menu */}
-            <Popover
+            < Popover
                 opened={popoverOpened}
                 target={popoverTargetRef.current}
-                onBackdropClick={() => setPopoverOpened(false)}
+                onBackdropClick={() => setPopoverOpened(false)
+                }
             >
                 <List nested>
                     <ListItem
@@ -202,6 +214,25 @@ export default function Lobby({
                     />
                 </List>
             </Popover>
-        </ScreenWithBackground>
+
+            {/* Toast Notification */}
+            <Toast
+                position="center"
+                opened={toastOpened}
+                button={
+                    <Button
+                        rounded
+                        clear
+                        small
+                        inline
+                        onClick={() => setToastOpened(false)}
+                    >
+                        Close
+                    </Button>
+                }
+            >
+                <div className="shrink">PIN code copied to clipboard!</div>
+            </Toast>
+        </ScreenWithBackground >
     );
 }

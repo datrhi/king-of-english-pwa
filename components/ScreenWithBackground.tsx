@@ -21,7 +21,7 @@ export default function ScreenWithBackground({
     contentPosition = 'center'
 }: Props) {
     const className = view === 'scrollable' ? "no-overscroll min-h-screen" : "h-screen overflow-hidden";
-    
+
     const justifyClass = {
         'start': 'justify-start',
         'center': 'justify-center',

@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "konsta/react";
 import { useState } from "react";
 
 export default function JoinGame() {
@@ -35,6 +36,9 @@ export default function JoinGame() {
             maxLength={7}
           />
         </div>
+        <Button large rounded onClick={handleSubmit}>
+          Join Game
+        </Button>
       </div>
     </div>
   );

@@ -1,9 +1,9 @@
 "use client";
 
-import { useTransitionRouter } from "@/lib/next-view-transitions";
 import { useCourses } from "@/hooks/useCourses";
+import { useTransitionRouter } from "@/lib/next-view-transitions";
 import type { Course } from "@/services/coursesApi";
-import { Sheet, Toolbar, ToolbarPane, Link, Block, Button, Preloader, Searchbar } from "konsta/react";
+import { Block, Button, Link, Preloader, Searchbar, Sheet, Toolbar, ToolbarPane } from "konsta/react";
 import { ChevronRight, X } from "lucide-react";
 import { useState } from "react";
 
@@ -29,7 +29,6 @@ export default function CourseList() {
 
   const handleCloseSheet = () => {
     setSheetOpened(false);
-    setSelectedCourse(null);
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,16 +42,16 @@ export default function CourseList() {
   // Filter courses based on search query
   const filteredCourses = searchQuery
     ? courses?.filter((course) =>
-        course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        course.description?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
     : courses;
 
   // Show loading state
   if (isLoading) {
     return (
       <div className="w-full flex items-center justify-center py-20">
-       <Preloader />
+        <Preloader />
       </div>
     );
   }
@@ -110,20 +109,20 @@ export default function CourseList() {
           </div>
         ) : (
           filteredCourses?.map((course: Course, index: number) => (
-          <div
-            key={course.id}
-            onClick={() => handleCourseClick(course)}
-            className={`${getBgClass(index)} w-full min-h-20 rounded-2xl flex flex-row items-center px-4 gap-4 hover:bg-blue-light-1 cursor-pointer active:scale-[0.98] transition-transform duration-150`}
-          >
-            <div className="flex-1 py-4">
-              <h2 className="font-text-medium text-title text-base font-semibold">
-                {course.name}
-              </h2>
+            <div
+              key={course.id}
+              onClick={() => handleCourseClick(course)}
+              className={`${getBgClass(index)} w-full min-h-20 rounded-2xl flex flex-row items-center px-4 gap-4 hover:bg-blue-light-1 cursor-pointer active:scale-[0.98] transition-transform duration-150`}
+            >
+              <div className="flex-1 py-4">
+                <h2 className="font-text-medium text-title text-base font-semibold">
+                  {course.name}
+                </h2>
+              </div>
+              <div className="flex-shrink-0 text-gray-400">
+                <ChevronRight size={16} />
+              </div>
             </div>
-            <div className="flex-shrink-0 text-gray-400">
-              <ChevronRight size={16} />
-            </div>
-          </div>
           ))
         )}
       </div>

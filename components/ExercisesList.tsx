@@ -1,13 +1,13 @@
 "use client";
 
-import { useTransitionRouter } from "@/lib/next-view-transitions";
 import { useExercises } from "@/hooks/useExercises";
+import { useTransitionRouter } from "@/lib/next-view-transitions";
 import type { Exercise } from "@/services/exercisesApi";
-import { Sheet, Toolbar, ToolbarPane, Link, Block, Button, Preloader, Searchbar } from "konsta/react";
-import { ChevronRight, X } from "lucide-react";
-import { useState } from "react";
-import Image from "next/image";
 import { shimmer, toBase64 } from "@/utils/shimmer";
+import { Block, Button, Link, Preloader, Searchbar, Sheet, Toolbar, ToolbarPane } from "konsta/react";
+import { ChevronRight, X } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
 
 interface ExercisesListProps {
   lessonId: string;
@@ -35,7 +35,6 @@ export default function ExercisesList({ lessonId }: ExercisesListProps) {
 
   const handleCloseSheet = () => {
     setSheetOpened(false);
-    setSelectedExercise(null);
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,15 +48,15 @@ export default function ExercisesList({ lessonId }: ExercisesListProps) {
   // Filter exercises based on search query
   const filteredExercises = searchQuery
     ? exercises?.filter((exercise) =>
-        exercise.name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      exercise.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
     : exercises;
 
   // Show loading state
   if (isLoading) {
     return (
       <div className="w-full flex items-center justify-center py-20">
-       <Preloader />
+        <Preloader />
       </div>
     );
   }
@@ -115,32 +114,32 @@ export default function ExercisesList({ lessonId }: ExercisesListProps) {
           </div>
         ) : (
           filteredExercises?.map((exercise: Exercise, index: number) => (
-          <div
-            key={exercise.id}
-            onClick={() => handleExerciseClick(exercise)}
-            className={`${getBgClass(index)} w-full min-h-20 rounded-2xl flex flex-row items-center px-4 gap-4 hover:bg-blue-light-1 cursor-pointer active:scale-[0.98] transition-transform duration-150`}
-          >
-            {exercise.image && (
-              <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden relative">
-                <Image 
-                  src={exercise.image.startsWith('http') ? exercise.image : `https://langeek.co${exercise.image}`} 
-                  alt={exercise.name}
-                  fill
-                  className="object-cover"
-                  placeholder="blur"
-                  blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(64, 64))}`}
-                />
+            <div
+              key={exercise.id}
+              onClick={() => handleExerciseClick(exercise)}
+              className={`${getBgClass(index)} w-full min-h-20 rounded-2xl flex flex-row items-center px-4 gap-4 hover:bg-blue-light-1 cursor-pointer active:scale-[0.98] transition-transform duration-150`}
+            >
+              {exercise.image && (
+                <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden relative">
+                  <Image
+                    src={exercise.image.startsWith('http') ? exercise.image : `https://langeek.co${exercise.image}`}
+                    alt={exercise.name}
+                    fill
+                    className="object-cover"
+                    placeholder="blur"
+                    blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(64, 64))}`}
+                  />
+                </div>
+              )}
+              <div className="flex-1 py-4">
+                <h2 className="font-text-medium text-title text-base font-semibold">
+                  {exercise.name}
+                </h2>
               </div>
-            )}
-            <div className="flex-1 py-4">
-              <h2 className="font-text-medium text-title text-base font-semibold">
-                {exercise.name}
-              </h2>
+              <div className="flex-shrink-0 text-gray-400">
+                <ChevronRight size={16} />
+              </div>
             </div>
-            <div className="flex-shrink-0 text-gray-400">
-              <ChevronRight size={16} />
-            </div>
-          </div>
           ))
         )}
       </div>
@@ -162,8 +161,8 @@ export default function ExercisesList({ lessonId }: ExercisesListProps) {
         <Block className="ios:mt-4">
           {selectedExercise?.image && (
             <div className="w-full h-48 rounded-lg overflow-hidden mb-4 relative">
-              <Image 
-                src={selectedExercise.image.startsWith('http') ? selectedExercise.image : `https://langeek.co${selectedExercise.image}`} 
+              <Image
+                src={selectedExercise.image.startsWith('http') ? selectedExercise.image : `https://langeek.co${selectedExercise.image}`}
                 alt={selectedExercise.name}
                 fill
                 className="object-cover"
