@@ -21,6 +21,7 @@ export type TransitionRouter = AppRouterInstance & {
   push: (href: string, options?: NavigateOptionsWithTransition) => void;
   replace: (href: string, options?: NavigateOptionsWithTransition) => void;
   back: (options?: TransitionOptions) => void;
+  reset: (path: string) => void;
   history: string[];
 };
 
@@ -108,6 +109,14 @@ export function useTransitionRouter() {
     [triggerTransition, router]
   );
 
+  const reset = useCallback(
+    (path: string) => {
+      setHistory([]);
+      window.location.replace(path);
+    },
+    [setHistory]
+  );
+
   return useMemo<TransitionRouter>(
     () => ({
       ...router,
@@ -115,7 +124,8 @@ export function useTransitionRouter() {
       replace,
       back,
       history,
+      reset,
     }),
-    [push, replace, back, router, history]
+    [push, replace, back, router, history, reset]
   );
 }

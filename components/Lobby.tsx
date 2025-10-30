@@ -1,4 +1,5 @@
 "use client";
+import { useDialog } from '@/providers/DialogProvider';
 import {
     Button,
     Card,
@@ -9,6 +10,7 @@ import {
     Toast
 } from 'konsta/react';
 import { MoreVertical } from 'lucide-react';
+import Image from 'next/image';
 import { useRef, useState } from 'react';
 import ScreenWithBackground from './ScreenWithBackground';
 
@@ -23,6 +25,7 @@ interface Props {
     pinCode: string;
     users: LobbyUser[];
     category: string;
+    image?: string;
     maxPlayers?: number;
     onStartGame?: () => void;
     onExitLobby?: () => void;
@@ -34,6 +37,7 @@ export default function Lobby({
     pinCode,
     users,
     category,
+    image,
     maxPlayers = 300,
     onStartGame,
     onExitLobby,
@@ -43,6 +47,8 @@ export default function Lobby({
     const [popoverOpened, setPopoverOpened] = useState(false);
     const [toastOpened, setToastOpened] = useState(false);
     const popoverTargetRef = useRef(null);
+    const { showAlert, showConfirm } = useDialog();
+
 
     const openPopover = () => {
         setPopoverOpened(true);
@@ -55,6 +61,10 @@ export default function Lobby({
             setTimeout(() => setToastOpened(false), 3000);
         } catch (err) {
             console.error('Failed to copy PIN code:', err);
+            showAlert({
+                content: 'Failed to copy PIN code to clipboard. Please try again.',
+                title: 'Error',
+            });
         }
     };
 
@@ -62,10 +72,23 @@ export default function Lobby({
         setPopoverOpened(false);
         switch (action) {
             case 'start':
-                onStartGame?.();
+                if (users.length < 2) {
+                    showAlert({
+                        content: 'You need at least 2 players to start the game.',
+                        title: 'Cannot Start Game',
+                    });
+                } else {
+                    onStartGame?.();
+                }
                 break;
             case 'exit':
-                onExitLobby?.();
+                showConfirm(
+                    {
+                        content: 'Are you sure you want to exit the lobby?',
+                        title: 'Exit Lobby',
+                        onConfirm: () => onExitLobby?.(),
+                    }
+                );
                 break;
             case 'edit':
                 onEditCharacter?.();
@@ -99,6 +122,18 @@ export default function Lobby({
                 {/* PIN Code Card */}
                 <Card className="overflow-hidden backdrop-blur-xl bg-white/30 shadow-xl border border-white/40">
                     <div className="p-6 text-center">
+                        {image && (
+                            <div className="flex items-center justify-center mb-4">
+                                <div className="w-32 h-32 rounded-lg overflow-hidden relative shadow-lg border-2 border-white/60">
+                                    <Image
+                                        src={image}
+                                        alt={category}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+                            </div>
+                        )}
                         <div className="flex items-center justify-center gap-2 mb-4">
                             <p className="text-2xl font-bold text-gray-600 tracking-wide">
                                 {category}
@@ -106,7 +141,7 @@ export default function Lobby({
                         </div>
                         <p className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3">PIN Code</p>
                         <div className="inline-block mb-4">
-                            <div onClick={copyPinCode} className="text-5xl font-bold text-primary tracking-widest">
+                            <div onClick={copyPinCode} className="text-5xl font-bold text-primary tracking-widest cursor-pointer hover:scale-105 transition-transform">
                                 {pinCode}
                             </div>
                         </div>
@@ -138,12 +173,14 @@ export default function Lobby({
                                     )}
                                     <div className="flex flex-col items-center space-y-2.5">
                                         {user.avatar ? (
-                                            <div className="relative">
+                                            <div className="relative w-14 h-14">
                                                 <div className="absolute inset-0 bg-blue-500/30 blur-md rounded-full"></div>
-                                                <img
+                                                <Image
                                                     alt={`${user.name} avatar`}
-                                                    className="relative w-14 h-14 rounded-full border-2 border-white/80 shadow-lg"
+                                                    className="relative rounded-full border-2 border-white/80 shadow-lg"
                                                     src={user.avatar}
+                                                    fill
+                                                    style={{ objectFit: 'cover' }}
                                                 />
                                             </div>
                                         ) : (

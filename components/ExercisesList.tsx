@@ -1,8 +1,10 @@
 "use client";
 
 import { useExercises } from "@/hooks/useExercises";
+import { useCreateRoom } from "@/hooks/useRooms";
 import { useTransitionRouter } from "@/lib/next-view-transitions";
 import type { Exercise } from "@/services/exercisesApi";
+import { getAvatarUrl, getUsername } from "@/services/userService";
 import { shimmer, toBase64 } from "@/utils/shimmer";
 import { Block, Button, Link, Preloader, Searchbar, Sheet, Toolbar, ToolbarPane } from "konsta/react";
 import { ChevronRight, X } from "lucide-react";
@@ -22,14 +24,50 @@ export default function ExercisesList({ lessonId }: ExercisesListProps) {
   // Fetch exercises from API
   const { data: exercises, isLoading, error } = useExercises(lessonId);
 
+  // Create room mutation
+  const createRoomMutation = useCreateRoom();
+
   const handleExerciseClick = (exercise: Exercise) => {
     setSelectedExercise(exercise);
     setSheetOpened(true);
   };
 
-  const handleCreateRoom = () => {
-    if (selectedExercise) {
-      router.push(`/lobby?exercise=${selectedExercise.id}`);
+  const handleCreateRoom = async () => {
+    if (!selectedExercise) return;
+
+    try {
+      // Get username from session storage or fetch from random user API
+      const username = await getUsername();
+
+      // Get avatar URL
+      const avatarUrl = getAvatarUrl(username);
+
+      // Create room with exercise details
+      const room = await createRoomMutation.mutateAsync({
+        name: username,
+        category: selectedExercise.name,
+        image: selectedExercise.image?.startsWith('http')
+          ? selectedExercise.image
+          : `https://langeek.co${selectedExercise.image}`,
+      });
+
+      console.log("Room created:", room);
+
+      // Format pin code with space (e.g., "123456" -> "123 456")
+      const formattedPin = room.pinCode.replace(/(\d{3})(\d{3})/, '$1 $2');
+
+      // Navigate to lobby - the lobby page will handle joining via WebSocket
+      const params = new URLSearchParams({
+        pin: formattedPin,
+        name: username,
+        avatar: avatarUrl,
+      });
+      router.push(`/lobby?${params.toString()}`);
+    } catch (error) {
+      console.error("Error creating room:", error);
+      alert("Failed to create room. Please try again.");
+    } finally {
+      setSheetOpened(false);
     }
   };
 
@@ -175,8 +213,13 @@ export default function ExercisesList({ lessonId }: ExercisesListProps) {
             {selectedExercise?.name}
           </h2>
           <div className="mt-8">
-            <Button large rounded onClick={handleCreateRoom}>
-              Create Room
+            <Button
+              large
+              rounded
+              onClick={handleCreateRoom}
+              disabled={createRoomMutation.isPending}
+            >
+              {createRoomMutation.isPending ? "Creating Room..." : "Create Room"}
             </Button>
           </div>
         </Block>
