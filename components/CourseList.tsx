@@ -14,7 +14,7 @@ export default function CourseList() {
   const router = useTransitionRouter();
 
   // Fetch courses from API
-  const { data: courses, isLoading, error } = useCourses();
+  const { data: courses, isLoading, error } = useCourses({ sortBy: 'name' });
 
   const handleCourseClick = (course: Course) => {
     setSelectedCourse(course);

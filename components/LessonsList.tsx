@@ -20,7 +20,7 @@ export default function LessonsList({ courseId }: LessonsListProps) {
   const router = useTransitionRouter();
 
   // Fetch lessons from API
-  const { data: lessons, isLoading, error } = useLessons(courseId);
+  const { data: lessons, isLoading, error } = useLessons(courseId, { sortBy: 'name' });
 
   const handleLessonClick = (lesson: Lesson) => {
     setSelectedLesson(lesson);

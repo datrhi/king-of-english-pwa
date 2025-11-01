@@ -22,7 +22,7 @@ export default function ExercisesList({ lessonId }: ExercisesListProps) {
   const router = useTransitionRouter();
 
   // Fetch exercises from API
-  const { data: exercises, isLoading, error } = useExercises(lessonId);
+  const { data: exercises, isLoading, error } = useExercises(lessonId, { sortBy: 'name' });
 
   // Create room mutation
   const createRoomMutation = useCreateRoom();
