@@ -31,10 +31,17 @@ export interface RoomUser {
   avatar?: string;
 }
 
+export interface Exercise {
+  id: string;
+  name: string;
+  image?: string;
+}
+
 export interface RoomData {
   pinCode: string;
   name: string;
-  category: string;
+  exerciseId: string;
+  exercise?: Exercise;
   image?: string;
   createdAt: string;
   updatedAt: string;

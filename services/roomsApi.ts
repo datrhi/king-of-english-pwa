@@ -1,9 +1,16 @@
 import { api } from "./api";
 
+export interface Exercise {
+  id: string;
+  name: string;
+  image?: string;
+}
+
 export interface Room {
   pinCode: string;
   name: string;
-  category: string;
+  exerciseId: string;
+  exercise?: Exercise;
   image?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -11,7 +18,7 @@ export interface Room {
 
 export interface CreateRoomPayload {
   name: string;
-  category: string;
+  exerciseId: string;
   image?: string;
 }
 

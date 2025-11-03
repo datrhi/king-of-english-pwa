@@ -24,7 +24,7 @@ interface LobbyUser {
 interface Props {
     pinCode: string;
     users: LobbyUser[];
-    category: string;
+    exerciseName: string;
     image?: string;
     maxPlayers?: number;
     onStartGame?: () => void;
@@ -36,7 +36,7 @@ interface Props {
 export default function Lobby({
     pinCode,
     users,
-    category,
+    exerciseName,
     image,
     maxPlayers = 300,
     onStartGame,
@@ -127,7 +127,7 @@ export default function Lobby({
                                 <div className="w-32 h-32 rounded-lg overflow-hidden relative shadow-lg border-2 border-white/60">
                                     <Image
                                         src={image}
-                                        alt={category}
+                                        alt={exerciseName}
                                         fill
                                         className="object-cover"
                                     />
@@ -136,7 +136,7 @@ export default function Lobby({
                         )}
                         <div className="flex items-center justify-center gap-2 mb-4">
                             <p className="text-2xl font-bold text-gray-600 tracking-wide">
-                                {category}
+                                {exerciseName}
                             </p>
                         </div>
                         <p className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3">PIN Code</p>

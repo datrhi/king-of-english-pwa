@@ -31,10 +31,10 @@ function LobbyContent() {
     // State
     const [users, setUsers] = useState<RoomUser[]>([]);
     const [roomData, setRoomData] = useState<{
-        category: string;
+        exerciseName: string;
         image?: string;
     }>({
-        category: 'Unknown Category',
+        exerciseName: 'Unknown Exercise',
         image: '',
     });
     const [currentUserId, setCurrentUserId] = useState<string>('');
@@ -52,7 +52,7 @@ function LobbyContent() {
                 if (result.success && result.data) {
                     setUsers(result.data.users);
                     setRoomData({
-                        category: result.data.room.category,
+                        exerciseName: result.data.room.exercise?.name || 'Unknown Exercise',
                         image: result.data.room.image,
                     });
                     setCurrentUserId(result.data.user.id);
@@ -153,7 +153,7 @@ function LobbyContent() {
         try {
             await navigator.share({
                 title: 'Join my game!',
-                text: `Join my ${roomData.category} game with PIN: ${pin}`,
+                text: `Join my ${roomData.exerciseName} game with PIN: ${pin}`,
                 url: window.location.href,
             });
         } catch (err) {
@@ -161,7 +161,7 @@ function LobbyContent() {
             // Fallback: copy to clipboard
             try {
                 await navigator.clipboard.writeText(
-                    `Join my ${roomData.category} game with PIN: ${pin}\n${window.location.href}`
+                    `Join my ${roomData.exerciseName} game with PIN: ${pin}\n${window.location.href}`
                 );
                 showAlert({
                     content: 'Lobby link copied to clipboard!',
@@ -198,7 +198,7 @@ function LobbyContent() {
         <Lobby
             pinCode={formattedPin}
             users={usersWithHostInfo}
-            category={roomData.category}
+            exerciseName={roomData.exerciseName}
             image={roomData.image}
             maxPlayers={300}
             onStartGame={handleStartGame}

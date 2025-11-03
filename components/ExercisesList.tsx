@@ -45,7 +45,7 @@ export default function ExercisesList({ lessonId }: ExercisesListProps) {
       // Create room with exercise details
       const room = await createRoomMutation.mutateAsync({
         name: username,
-        category: selectedExercise.name,
+        exerciseId: selectedExercise.id,
         image: selectedExercise.image?.startsWith('http')
           ? selectedExercise.image
           : `https://langeek.co${selectedExercise.image}`,
