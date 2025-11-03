@@ -2,16 +2,16 @@
 import { useRandomWords } from '@/hooks/useWords';
 import { useTransitionRouter } from '@/lib/next-view-transitions';
 import { useDialog } from '@/providers/DialogProvider';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
     Button,
     Card,
     Preloader
 } from 'konsta/react';
-import { Check, Pause, Play, Settings } from 'lucide-react';
+import { Check, ChevronRight, Pause, Play, Settings, Volume2 } from 'lucide-react';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import type { Swiper as SwiperType } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
@@ -25,6 +25,9 @@ interface Question {
     description: string;
     answer: string;
     scrambled: string;
+    titleVoice: string;
+    pronunciation: string;
+    examples: string[];
 }
 
 function GameContent() {
@@ -36,6 +39,7 @@ function GameContent() {
     const pin = searchParams.get('pin') || '000000';
     const exerciseId = searchParams.get('exerciseId') || '';
     const exerciseName = searchParams.get('exerciseName') || 'Unknown Exercise';
+    const isHost = searchParams.get('isHost') === 'true';
 
     // Fetch random words
     const { data: words, isLoading, error } = useRandomWords(exerciseId, 10);
@@ -48,6 +52,10 @@ function GameContent() {
     const [isPaused, setIsPaused] = useState(false);
     const [showWrongAnimation, setShowWrongAnimation] = useState(false);
     const [showCorrectAnimation, setShowCorrectAnimation] = useState(false);
+    const [showWordDetails, setShowWordDetails] = useState(false);
+    const [timeRemaining, setTimeRemaining] = useState(10);
+    const audioRef = useRef<HTMLAudioElement>(null);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
 
     // Convert words to questions
     const questions: Question[] = useMemo(() => {
@@ -57,6 +65,9 @@ function GameContent() {
             description: word.translation,
             answer: word.title.toLowerCase().trim(),
             scrambled: scrambleWord(word.title),
+            titleVoice: word.titleVoice,
+            pronunciation: word.pronunciation,
+            examples: word.examples || [],
         })) || [];
     }, [words]);
 
@@ -70,6 +81,34 @@ function GameContent() {
             });
         }
     }, [error]);
+
+    // Auto-trigger timer for next question
+    useEffect(() => {
+        if (showWordDetails) {
+            setTimeRemaining(10);
+
+            // Start countdown
+            const interval = setInterval(() => {
+                setTimeRemaining((prev) => {
+                    if (prev <= 1) {
+                        clearInterval(interval);
+                        // Auto-trigger next question when timer reaches 0
+                        handleNextQuestion();
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+
+            timerRef.current = interval;
+
+            return () => {
+                if (timerRef.current) {
+                    clearInterval(timerRef.current);
+                }
+            };
+        }
+    }, [showWordDetails]);
 
     const handleAnswerChange = (value: string) => {
         setAnswers((prev) => ({
@@ -87,18 +126,14 @@ function GameContent() {
             setScore((prev) => prev + 1);
             setShowCorrectAnimation(true);
 
-            // Wait for animation then move to next question or finish
+            // Show word details slider after a short delay
             setTimeout(() => {
-                setShowCorrectAnimation(false);
-
-                if (currentQuestionIndex < questions.length - 1) {
-                    // Move to next question
-                    swiperInstance?.slideNext();
-                } else {
-                    // Game finished
-                    handleGameFinish();
+                setShowWordDetails(true);
+                // Auto-play the audio
+                if (audioRef.current) {
+                    audioRef.current.play().catch(err => console.log('Audio play failed:', err));
                 }
-            }, 2000);
+            }, 500);
         } else {
             // Wrong answer - trigger red background animation
             setShowWrongAnimation(true);
@@ -113,6 +148,25 @@ function GameContent() {
             setTimeout(() => {
                 setShowWrongAnimation(false);
             }, 2000);
+        }
+    };
+
+    const handleNextQuestion = () => {
+        // Clear timer if manually triggered
+        if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+        }
+
+        setShowWordDetails(false);
+        setShowCorrectAnimation(false);
+
+        if (currentQuestionIndex < questions.length - 1) {
+            // Move to next question
+            swiperInstance?.slideNext();
+        } else {
+            // Game finished
+            handleGameFinish();
         }
     };
 
@@ -331,7 +385,112 @@ function GameContent() {
                     ))}
                 </Swiper>
             </div>
-        </motion.div>
+
+            {/* Word Details Slider */}
+            <AnimatePresence>
+                {showWordDetails && questions[currentQuestionIndex] && (
+                    <motion.div
+                        initial={{ y: "100%" }}
+                        animate={{ y: 0 }}
+                        exit={{ y: "100%" }}
+                        transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                        className="fixed bottom-0 left-0 right-0 backdrop-blur-xl bg-white/40 rounded-t-3xl shadow-2xl border-t-2 border-white/60 z-50 max-h-[60vh] overflow-y-auto"
+                    >
+                        <div className="p-6 space-y-4">
+                            {/* Header */}
+                            <div className="flex items-center justify-between">
+                                <div className="flex-1">
+                                    <h3 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                                        {questions[currentQuestionIndex].answer}
+                                    </h3>
+                                    {questions[currentQuestionIndex].pronunciation && (
+                                        <p className="text-sm text-gray-700 mt-1 font-medium">
+                                            /{questions[currentQuestionIndex].pronunciation}/
+                                        </p>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        if (audioRef.current) {
+                                            audioRef.current.currentTime = 0;
+                                            audioRef.current.play().catch(err => console.log('Audio play failed:', err));
+                                        }
+                                    }}
+                                    className="p-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full hover:from-indigo-600 hover:to-purple-600 transition-all shadow-md ml-4 backdrop-blur-sm"
+                                >
+                                    <Volume2 size={24} />
+                                </button>
+                            </div>
+
+                            {/* Translation */}
+                            <div className="backdrop-blur-xl bg-white/30 rounded-2xl p-4 border border-white/40 shadow-lg">
+                                <p className="text-gray-700 font-medium">
+                                    {questions[currentQuestionIndex].description}
+                                </p>
+                            </div>
+
+                            {/* Examples (max 2) */}
+                            {questions[currentQuestionIndex].examples.length > 0 && (
+                                <div className="space-y-2">
+                                    <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Examples</h4>
+                                    {questions[currentQuestionIndex].examples.slice(0, 2).map((example, idx) => (
+                                        <div key={idx} className="backdrop-blur-xl bg-indigo-100/40 rounded-xl p-3 border-l-4 border-indigo-500 shadow-md">
+                                            <p className="text-gray-700 text-sm italic">"{example}"</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+
+                            {/* Next Button - Only for Host */}
+                            {isHost ? (
+                                <button
+                                    onClick={handleNextQuestion}
+                                    className="w-full relative overflow-hidden backdrop-blur-xl bg-white/20 border-2 border-white/40 text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 hover:scale-[1.02] transition-all shadow-lg hover:shadow-xl"
+                                >
+                                    {/* Animated wave fill - fills from left to right */}
+                                    <motion.div
+                                        key={`wave-${currentQuestionIndex}-${showWordDetails}`}
+                                        className="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-600 to-purple-600"
+                                        initial={{ width: '0%' }}
+                                        animate={{ width: '100%' }}
+                                        transition={{
+                                            duration: 10,
+                                            ease: 'linear',
+                                            repeat: 0,
+                                        }}
+                                    />
+
+                                    {/* Button content */}
+                                    <span className="relative z-10 flex items-center gap-2">
+                                        {currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'Finish Game'}
+                                        <ChevronRight size={20} />
+                                    </span>
+                                </button>
+                            ) : (
+
+                                <div className="backdrop-blur-xl bg-white/30 rounded-2xl p-3 border border-white/40 shadow-lg text-center">
+                                    <p className="text-gray-700 text-sm font-medium">
+                                        Waiting for host to move to next question...
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Hidden audio element */}
+                        {questions[currentQuestionIndex].titleVoice && (
+                            <audio
+                                autoPlay
+                                ref={audioRef}
+                                src={questions[currentQuestionIndex].titleVoice}
+                                preload="auto"
+                            />
+                        )}
+                    </motion.div>
+                )
+                }
+            </AnimatePresence >
+        </motion.div >
     );
 }
 

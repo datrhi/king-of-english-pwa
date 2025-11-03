@@ -134,6 +134,7 @@ function LobbyContent() {
             pin: rawPin,
             exerciseId: roomData.exerciseId,
             exerciseName: roomData.exerciseName,
+            isHost: isHost.toString(),
         });
         const gameUrl = `/game?${params.toString()}`;
         router.push(gameUrl);
