@@ -32,9 +32,11 @@ function LobbyContent() {
     const [users, setUsers] = useState<RoomUser[]>([]);
     const [roomData, setRoomData] = useState<{
         exerciseName: string;
+        exerciseId: string;
         image?: string;
     }>({
         exerciseName: 'Unknown Exercise',
+        exerciseId: '',
         image: '',
     });
     const [currentUserId, setCurrentUserId] = useState<string>('');
@@ -53,6 +55,7 @@ function LobbyContent() {
                     setUsers(result.data.users);
                     setRoomData({
                         exerciseName: result.data.room.exercise?.name || 'Unknown Exercise',
+                        exerciseId: result.data.room.exerciseId,
                         image: result.data.room.image,
                     });
                     setCurrentUserId(result.data.user.id);
@@ -103,7 +106,7 @@ function LobbyContent() {
             // Show message and redirect
             showAlert({
                 content: data.message,
-                onConfirm: () => router.reset('/'),
+                onConfirm: () => router.reset('/?source=pwa'),
                 title: 'Room Closed',
                 disableBackdropClick: true,
             });
@@ -125,7 +128,15 @@ function LobbyContent() {
 
     const handleStartGame = () => {
         console.log('Starting game...');
-        // TODO: Navigate to game screen
+        // Navigate to game screen with necessary params
+        const rawPin = pin.replace(/\s/g, '');
+        const params = new URLSearchParams({
+            pin: rawPin,
+            exerciseId: roomData.exerciseId,
+            exerciseName: roomData.exerciseName,
+        });
+        const gameUrl = `/game?${params.toString()}`;
+        router.push(gameUrl);
     };
 
     const handleExitLobby = () => {

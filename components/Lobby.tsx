@@ -72,9 +72,9 @@ export default function Lobby({
         setPopoverOpened(false);
         switch (action) {
             case 'start':
-                if (users.length < 2) {
+                if (users.length < 1) {
                     showAlert({
-                        content: 'You need at least 2 players to start the game.',
+                        content: 'You need at least 1 players to start the game.',
                         title: 'Cannot Start Game',
                     });
                 } else {

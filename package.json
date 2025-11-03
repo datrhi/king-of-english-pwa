@@ -24,13 +24,15 @@
     "react-dom": "19.1.1",
     "sass": "^1.93.3",
     "serwist": "latest",
-    "socket.io-client": "^4.8.1"
+    "socket.io-client": "^4.8.1",
+    "swiper": "^12.0.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.16",
     "@types/node": "24.3.0",
     "@types/react": "19.1.12",
     "@types/react-dom": "19.1.9",
+    "@types/swiper": "^6.0.0",
     "tailwindcss": "^4.1.16",
     "typescript": "5.9.2"
   }
