@@ -56,7 +56,8 @@ export default function Lobby({
 
     const copyPinCode = async () => {
         try {
-            await navigator.clipboard.writeText(pinCode);
+            const rawPin = pinCode.replace(/\s/g, '');
+            await navigator.clipboard.writeText(rawPin);
             setToastOpened(true);
             setTimeout(() => setToastOpened(false), 3000);
         } catch (err) {
