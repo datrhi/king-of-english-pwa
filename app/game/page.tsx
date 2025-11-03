@@ -8,7 +8,7 @@ import {
     Card,
     Preloader
 } from 'konsta/react';
-import { Check, ChevronRight, Pause, Play, Settings, Volume2 } from 'lucide-react';
+import { Check, ChevronRight, Crown, Medal, Pause, Play, Settings, Trophy, Volume2 } from 'lucide-react';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
@@ -52,6 +52,7 @@ function GameContent() {
     const [isPaused, setIsPaused] = useState(false);
     const [showWrongAnimation, setShowWrongAnimation] = useState(false);
     const [showCorrectAnimation, setShowCorrectAnimation] = useState(false);
+    const [showLeaderboard, setShowLeaderboard] = useState(false);
     const [showWordDetails, setShowWordDetails] = useState(false);
     const [timeRemaining, setTimeRemaining] = useState(10);
     const audioRef = useRef<HTMLAudioElement>(null);
@@ -70,6 +71,16 @@ function GameContent() {
             examples: word.examples || [],
         })) || [];
     }, [words]);
+
+    // Mock leaderboard data - In real app, this would come from the server
+    const leaderboardData = useMemo(() => {
+        return [
+            { id: '1', name: 'You', score: score + 1, isCurrentUser: true },
+            { id: '2', name: 'Player 2', score: Math.max(0, score + 1 - Math.floor(Math.random() * 3)), isCurrentUser: false },
+            { id: '3', name: 'Player 3', score: Math.max(0, score + 1 - Math.floor(Math.random() * 4)), isCurrentUser: false },
+            { id: '4', name: 'Player 4', score: Math.max(0, score + 1 - Math.floor(Math.random() * 5)), isCurrentUser: false },
+        ].sort((a, b) => b.score - a.score);
+    }, [score]);
 
     useEffect(() => {
         if (error) {
@@ -126,14 +137,10 @@ function GameContent() {
             setScore((prev) => prev + 1);
             setShowCorrectAnimation(true);
 
-            // Show word details slider after a short delay
+            // Show leaderboard after a short delay
             setTimeout(() => {
-                setShowWordDetails(true);
-                // Auto-play the audio
-                if (audioRef.current) {
-                    audioRef.current.play().catch(err => console.log('Audio play failed:', err));
-                }
-            }, 500);
+                setShowLeaderboard(true);
+            }, 800);
         } else {
             // Wrong answer - trigger red background animation
             setShowWrongAnimation(true);
@@ -151,6 +158,18 @@ function GameContent() {
         }
     };
 
+    // Auto-hide leaderboard after 5 seconds
+    useEffect(() => {
+        if (showLeaderboard) {
+            const timer = setTimeout(() => {
+                setShowLeaderboard(false);
+                setShowWordDetails(true);
+            }, 5000);
+
+            return () => clearTimeout(timer);
+        }
+    }, [showLeaderboard]);
+
     const handleNextQuestion = () => {
         // Clear timer if manually triggered
         if (timerRef.current) {
@@ -160,6 +179,7 @@ function GameContent() {
 
         setShowWordDetails(false);
         setShowCorrectAnimation(false);
+        setShowLeaderboard(false);
 
         if (currentQuestionIndex < questions.length - 1) {
             // Move to next question
@@ -385,6 +405,106 @@ function GameContent() {
                     ))}
                 </Swiper>
             </div>
+
+            {/* Leaderboard Screen */}
+            <AnimatePresence>
+                {showLeaderboard && (
+                    <motion.div
+                        initial={{ opacity: 0, y: "100%" }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: "100%" }}
+                        transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                        className="fixed bottom-0 left-0 right-0 backdrop-blur-xl bg-white/40 rounded-t-3xl shadow-2xl border-t-2 border-white/60 z-50 max-h-[70vh] overflow-y-auto"
+                    >
+                        <div className="p-6 space-y-4">
+                            {/* Header */}
+                            <div className="text-center">
+                                <motion.div
+                                    initial={{ scale: 0, rotate: -180 }}
+                                    animate={{ scale: 1, rotate: 0 }}
+                                    transition={{ delay: 0.1, type: "spring", damping: 15 }}
+                                    className="flex justify-center mb-3"
+                                >
+                                    <Trophy className="text-yellow-500" size={48} />
+                                </motion.div>
+                                <motion.h2
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="text-3xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2"
+                                >
+                                    Leaderboard
+                                </motion.h2>
+                                <motion.p
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.3 }}
+                                    className="text-gray-700 text-sm font-medium"
+                                >
+                                    Current Rankings
+                                </motion.p>
+                            </div>
+
+                            {/* Leaderboard List */}
+                            <div className="space-y-3">
+                                {leaderboardData.map((player, index) => (
+                                    <motion.div
+                                        key={player.id}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 0.4 + index * 0.1 }}
+                                        className={`flex items-center gap-4 p-4 rounded-2xl backdrop-blur-xl shadow-lg ${player.isCurrentUser
+                                            ? 'bg-gradient-to-r from-indigo-100/60 to-purple-100/60 border-2 border-indigo-400/60'
+                                            : 'bg-white/30 border border-white/40'
+                                            }`}
+                                    >
+                                        {/* Rank Badge */}
+                                        <div className="flex-shrink-0">
+                                            {index === 0 ? (
+                                                <motion.div
+                                                    animate={{ rotate: [0, 10, -10, 0] }}
+                                                    transition={{ delay: 0.7, duration: 0.5 }}
+                                                    className="w-12 h-12 backdrop-blur-xl bg-gradient-to-br from-yellow-400/80 to-yellow-600/80 rounded-full flex items-center justify-center shadow-lg border-2 border-yellow-300/40"
+                                                >
+                                                    <Crown className="text-white" size={24} />
+                                                </motion.div>
+                                            ) : index === 1 ? (
+                                                <div className="w-12 h-12 backdrop-blur-xl bg-gradient-to-br from-gray-300/80 to-gray-500/80 rounded-full flex items-center justify-center shadow-md border-2 border-gray-200/40">
+                                                    <Medal className="text-white" size={24} />
+                                                </div>
+                                            ) : index === 2 ? (
+                                                <div className="w-12 h-12 backdrop-blur-xl bg-gradient-to-br from-orange-400/80 to-orange-600/80 rounded-full flex items-center justify-center shadow-md border-2 border-orange-300/40">
+                                                    <Medal className="text-white" size={24} />
+                                                </div>
+                                            ) : (
+                                                <div className="w-12 h-12 backdrop-blur-xl bg-white/50 rounded-full flex items-center justify-center shadow-sm border-2 border-white/40">
+                                                    <span className="text-gray-700 font-bold text-lg">{index + 1}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Player Info */}
+                                        <div className="flex-1">
+                                            <p className={`font-bold text-base ${player.isCurrentUser ? 'text-indigo-700' : 'text-gray-800'
+                                                }`}>
+                                                {player.name}
+                                                {player.isCurrentUser && ' 👤'}
+                                            </p>
+                                        </div>
+
+                                        {/* Score */}
+                                        <div className={`text-right font-bold text-xl ${player.isCurrentUser ? 'text-indigo-700' : 'text-gray-700'
+                                            }`}>
+                                            {player.score}
+                                            <span className="text-sm ml-1 font-medium">pts</span>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Word Details Slider */}
             <AnimatePresence>
