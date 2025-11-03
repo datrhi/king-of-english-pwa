@@ -46,7 +46,30 @@
       "purpose": "any"
     }
   ],
-  "start_url": "/",
+  "screenshots": [
+    {
+      "src": "/images/home_screenshot.png",
+      "sizes": "591x1280",
+      "type": "image/jpg"
+    },
+    {
+      "src": "/images/join_screenshot.png",
+      "sizes": "591x1280",
+      "type": "image/jpg"
+    },
+    {
+      "src": "/images/lobby_screenshot.png",
+      "sizes": "591x1280",
+      "type": "image/jpg"
+    },
+    {
+      "src": "/images/desktop_screenshot.png",
+      "sizes": "1920x936",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "start_url": "/?source=pwa",
   "orientation": "portrait",
   "display": "standalone",
   "theme_color": "#0a305a",
