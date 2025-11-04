@@ -56,8 +56,14 @@ function GameContent() {
     const [showLeaderboard, setShowLeaderboard] = useState(false);
     const [showWordDetails, setShowWordDetails] = useState(false);
     const [timeRemaining, setTimeRemaining] = useState(10);
+    const [leaderboardProgress, setLeaderboardProgress] = useState(100); // Progress from 100 to 0 for leaderboard
+    const [questionProgress, setQuestionProgress] = useState(1000); // Progress from 1000 to 0
+    const [questionStartTime, setQuestionStartTime] = useState<number | null>(null);
+    const [pointsEarned, setPointsEarned] = useState(0);
+    const [showPointsAnimation, setShowPointsAnimation] = useState(false);
     const audioRef = useRef<HTMLAudioElement>(null);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     // Convert words to questions
     const questions: Question[] = useMemo(() => {
@@ -76,10 +82,10 @@ function GameContent() {
     // Mock leaderboard data - In real app, this would come from the server
     const leaderboardData = useMemo(() => {
         return [
-            { id: '1', name: 'You', score: score + 1, isCurrentUser: true },
-            { id: '2', name: 'Player 2', score: Math.max(0, score + 1 - Math.floor(Math.random() * 3)), isCurrentUser: false },
-            { id: '3', name: 'Player 3', score: Math.max(0, score + 1 - Math.floor(Math.random() * 4)), isCurrentUser: false },
-            { id: '4', name: 'Player 4', score: Math.max(0, score + 1 - Math.floor(Math.random() * 5)), isCurrentUser: false },
+            { id: '1', name: 'You', score: score, isCurrentUser: true },
+            { id: '2', name: 'Player 2', score: Math.max(0, Math.floor(score * 0.9)), isCurrentUser: false },
+            { id: '3', name: 'Player 3', score: Math.max(0, Math.floor(score * 0.8)), isCurrentUser: false },
+            { id: '4', name: 'Player 4', score: Math.max(0, Math.floor(score * 0.7)), isCurrentUser: false },
         ].sort((a, b) => b.score - a.score);
     }, [score]);
 
@@ -94,23 +100,106 @@ function GameContent() {
         }
     }, [error]);
 
-    // Auto-trigger timer for next question
+    // Question timer - starts when question is shown
     useEffect(() => {
-        if (showWordDetails) {
-            setTimeRemaining(10);
+        // Start timer only if not showing leaderboard or word details
+        if (!showLeaderboard && !showWordDetails && !showCorrectAnimation && questions.length > 0) {
+            // Initialize question start time
+            const startTime = Date.now();
+            setQuestionStartTime(startTime);
+            setQuestionProgress(1000);
 
-            // Start countdown
+            // Update progress every 10ms for smooth animation
             const interval = setInterval(() => {
-                setTimeRemaining((prev) => {
-                    if (prev <= 1) {
-                        clearInterval(interval);
-                        // Auto-trigger next question when timer reaches 0
-                        handleNextQuestion();
-                        return 0;
+                const elapsed = Date.now() - startTime;
+                const newProgress = Math.max(0, 1000 - elapsed / 10);
+                setQuestionProgress(newProgress);
+
+                // Auto-submit when time runs out
+                if (newProgress <= 0) {
+                    clearInterval(interval);
+                    // Treat as wrong answer - no points
+                    handleTimeOut();
+                }
+            }, 10);
+
+            progressTimerRef.current = interval;
+
+            return () => {
+                if (progressTimerRef.current) {
+                    clearInterval(progressTimerRef.current);
+                }
+            };
+        }
+    }, [currentQuestionIndex, showLeaderboard, showWordDetails, showCorrectAnimation, questions.length]);
+
+    // Function to handle timeout
+    const handleTimeOut = () => {
+        setShowWrongAnimation(true);
+        setThemeColor('#ef4444');
+
+        // Clear the input
+        setAnswers((prev) => ({
+            ...prev,
+            [currentQuestionIndex]: '',
+        }));
+
+        // Show word details after a short delay
+        setTimeout(() => {
+            setShowWordDetails(true);
+        }, 800);
+
+        // Reset animation
+        setTimeout(() => {
+            setShowWrongAnimation(false);
+            setThemeColor();
+        }, 2000);
+    };
+
+    // Auto-trigger next question after leaderboard
+    useEffect(() => {
+        if (showLeaderboard) {
+            setLeaderboardProgress(100);
+
+            // Start countdown for 5 seconds
+            const startTime = Date.now();
+            const interval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const newProgress = Math.max(0, 100 - (elapsed / 50)); // 5000ms / 100 = 50ms per percent
+                setLeaderboardProgress(newProgress);
+
+                if (newProgress <= 0) {
+                    clearInterval(interval);
+                    // Auto-trigger next question when timer reaches 0
+                    setShowLeaderboard(false);
+                    setShowWordDetails(false);
+
+                    if (currentQuestionIndex < questions.length - 1) {
+                        // Move to next question
+                        setTimeout(() => {
+                            swiperInstance?.slideNext();
+                        }, 100);
+                    } else {
+                        // Game finished - show completion dialog
+                        setTimeout(() => {
+                            showConfirm({
+                                content: `You scored ${score} points! Would you like to play again?`,
+                                title: '🎮 Game Over',
+                                onConfirm: () => {
+                                    // Restart game
+                                    router.refresh();
+                                },
+                                onCancel: () => {
+                                    // Go back to lobby
+                                    router.reset('/?source=pwa');
+                                },
+                                cancelText: 'Exit',
+                                confirmText: 'Play Again',
+                            });
+                        }, 300);
                     }
-                    return prev - 1;
-                });
-            }, 1000);
+                }
+            }, 50);
 
             timerRef.current = interval;
 
@@ -120,7 +209,7 @@ function GameContent() {
                 }
             };
         }
-    }, [showWordDetails]);
+    }, [showLeaderboard, currentQuestionIndex, questions.length, swiperInstance, score, showConfirm, router]);
 
     const handleAnswerChange = (value: string) => {
         setAnswers((prev) => ({
@@ -133,15 +222,28 @@ function GameContent() {
         const currentAnswer = answers[currentQuestionIndex]?.toLowerCase().trim() || '';
         const correctAnswer = questions[currentQuestionIndex].answer;
 
+        // Stop the progress timer
+        if (progressTimerRef.current) {
+            clearInterval(progressTimerRef.current);
+        }
+
         if (currentAnswer === correctAnswer) {
-            // Correct answer - trigger green background animation
-            setScore((prev) => prev + 1);
+            // Correct answer - calculate points based on remaining time
+            const earnedPoints = Math.round(questionProgress);
+            setPointsEarned(earnedPoints);
+            setScore((prev) => prev + earnedPoints);
             setShowCorrectAnimation(true);
+            setShowPointsAnimation(true);
             setThemeColor('#22c55e');
 
-            // Show leaderboard after a short delay
+            // Hide points animation after 2 seconds
             setTimeout(() => {
-                setShowLeaderboard(true);
+                setShowPointsAnimation(false);
+            }, 2000);
+
+            // Show word details after a short delay
+            setTimeout(() => {
+                setShowWordDetails(true);
             }, 800);
 
             setTimeout(() => {
@@ -159,7 +261,12 @@ function GameContent() {
                 [currentQuestionIndex]: '',
             }));
 
-            // Reset animation after 2 seconds for smoother fade back
+            // Show word details after a short delay
+            setTimeout(() => {
+                setShowWordDetails(true);
+            }, 800);
+
+            // Reset animation after 2 seconds
             setTimeout(() => {
                 setShowWrongAnimation(false);
                 setThemeColor();
@@ -167,17 +274,11 @@ function GameContent() {
         }
     };
 
-    // Auto-hide leaderboard after 5 seconds
-    useEffect(() => {
-        if (showLeaderboard) {
-            const timer = setTimeout(() => {
-                setShowLeaderboard(false);
-                setShowWordDetails(true);
-            }, 5000);
 
-            return () => clearTimeout(timer);
-        }
-    }, [showLeaderboard]);
+    const handleShowLeaderboard = () => {
+        setShowWordDetails(false);
+        setShowLeaderboard(true);
+    };
 
     const handleNextQuestion = () => {
         // Clear timer if manually triggered
@@ -200,7 +301,7 @@ function GameContent() {
 
     const handleGameFinish = () => {
         showConfirm({
-            content: `You scored ${score + 1} out of ${questions.length}! Would you like to play again?`,
+            content: `You scored ${score} points! Would you like to play again?`,
             title: '🎮 Game Over',
             onConfirm: () => {
                 // Restart game
@@ -271,6 +372,38 @@ function GameContent() {
                 }}
             />
 
+            {/* Points Earned Animation */}
+            <AnimatePresence>
+                {showPointsAnimation && (
+                    <motion.div
+                        className="fixed inset-0 pointer-events-none z-[100] flex items-center justify-center"
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 1.5 }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                    >
+                        <div className="backdrop-blur-xl bg-white/40 rounded-3xl px-8 py-6 border-4 border-white/60 shadow-2xl">
+                            <motion.div
+                                initial={{ y: 20 }}
+                                animate={{ y: 0 }}
+                                transition={{ delay: 0.1, type: "spring", damping: 10 }}
+                                className="text-6xl font-black bg-gradient-to-r from-yellow-400 via-green-400 to-emerald-500 bg-clip-text text-transparent text-center"
+                            >
+                                +{pointsEarned}
+                            </motion.div>
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.2 }}
+                                className="text-center text-white font-bold text-lg mt-2 drop-shadow-lg"
+                            >
+                                Points!
+                            </motion.div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Header */}
             <div className="relative z-10 flex items-center justify-between px-4 py-3 bg-white/40 backdrop-blur-xl border-b border-white/60 shadow-md">
                 <div className="flex items-center gap-2">
@@ -278,6 +411,11 @@ function GameContent() {
                     {/* <span className="text-gray-600 text-sm">👥 0 (1)</span> */}
                 </div>
                 <div className="flex items-center gap-3">
+                    <div className="backdrop-blur-xl bg-gradient-to-r from-indigo-500/20 to-purple-500/20 px-3 py-1.5 rounded-full border border-white/40">
+                        <span className="text-indigo-700 font-bold text-sm">
+                            {score} pts
+                        </span>
+                    </div>
                     <span className="text-gray-800 font-bold text-base">
                         {currentQuestionIndex + 1}/{questions.length}
                     </span>
@@ -323,6 +461,36 @@ function GameContent() {
                                         {question.scrambled}
                                     </h2>
                                 </div>
+
+                                {/* Progress Bar */}
+                                {!showLeaderboard && !showWordDetails && (
+                                    <div className="w-full max-w-md px-2">
+                                        <div className="backdrop-blur-xl bg-white/30 rounded-full p-2 border border-white/40 shadow-lg">
+                                            <div className="relative h-6 backdrop-blur-sm bg-white/40 rounded-full overflow-hidden">
+                                                <motion.div
+                                                    className="absolute inset-0 bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 rounded-full"
+                                                    animate={{
+                                                        width: `${(questionProgress / 1000) * 100}%`,
+                                                        backgroundColor: questionProgress > 500
+                                                            ? '#22c55e'
+                                                            : questionProgress > 250
+                                                                ? '#f59e0b'
+                                                                : '#ef4444',
+                                                    }}
+                                                    transition={{
+                                                        duration: 0.1,
+                                                        ease: "linear"
+                                                    }}
+                                                />
+                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                    <span className="relative z-10 text-xs font-bold text-white drop-shadow-md">
+                                                        {Math.round(questionProgress)} pts
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Input and Button */}
                                 <div className="flex gap-2 sm:gap-3 w-full max-w-md px-2 items-center">
@@ -440,10 +608,38 @@ function GameContent() {
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     transition={{ delay: 0.3 }}
-                                    className="text-gray-700 text-sm font-medium"
+                                    className="text-gray-700 text-sm font-medium mb-3"
                                 >
                                     Current Rankings
                                 </motion.p>
+
+                                {/* Progress Bar - Auto next question in 5 seconds */}
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.4 }}
+                                    className="w-full max-w-sm mx-auto"
+                                >
+                                    <div className="backdrop-blur-xl bg-white/30 rounded-full p-2 border border-white/40 shadow-lg">
+                                        <div className="relative h-4 backdrop-blur-sm bg-white/40 rounded-full overflow-hidden">
+                                            <motion.div
+                                                className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full"
+                                                animate={{
+                                                    width: `${leaderboardProgress}%`,
+                                                }}
+                                                transition={{
+                                                    duration: 0.05,
+                                                    ease: "linear"
+                                                }}
+                                            />
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <span className="relative z-10 text-xs font-bold text-white drop-shadow-md">
+                                                    Next in {Math.ceil(leaderboardProgress / 20)}s
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
                             </div>
 
                             {/* Leaderboard List */}
@@ -563,28 +759,15 @@ function GameContent() {
                             )}
 
 
-                            {/* Next Button - Only for Host */}
+                            {/* Next Button - Show Leaderboard */}
                             {isHost ? (
                                 <button
-                                    onClick={handleNextQuestion}
-                                    className="w-full relative overflow-hidden backdrop-blur-xl bg-white/20 border-2 border-white/40 text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 hover:scale-[1.02] transition-all shadow-lg hover:shadow-xl"
+                                    onClick={handleShowLeaderboard}
+                                    className="w-full relative overflow-hidden backdrop-blur-xl bg-gradient-to-r from-indigo-600 to-purple-600 border-2 border-white/40 text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 hover:scale-[1.02] transition-all shadow-lg hover:shadow-xl"
                                 >
-                                    {/* Animated wave fill - fills from left to right */}
-                                    <motion.div
-                                        key={`wave-${currentQuestionIndex}-${showWordDetails}`}
-                                        className="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-600 to-purple-600"
-                                        initial={{ width: '0%' }}
-                                        animate={{ width: '100%' }}
-                                        transition={{
-                                            duration: 10,
-                                            ease: 'linear',
-                                            repeat: 0,
-                                        }}
-                                    />
-
                                     {/* Button content */}
                                     <span className="relative z-10 flex items-center gap-2">
-                                        {currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'Finish Game'}
+                                        Show Leaderboard
                                         <ChevronRight size={20} />
                                     </span>
                                 </button>
@@ -592,7 +775,7 @@ function GameContent() {
 
                                 <div className="backdrop-blur-xl bg-white/30 rounded-2xl p-3 border border-white/40 shadow-lg text-center">
                                     <p className="text-gray-700 text-sm font-medium">
-                                        Waiting for host to move to next question...
+                                        Waiting for host to show leaderboard...
                                     </p>
                                 </div>
                             )}
