@@ -7,3 +7,10 @@ export const isInStandaloneMode = () =>
   typeof window !== "undefined" &&
   "standalone" in window.navigator &&
   window.navigator.standalone;
+
+export const setThemeColor = (color?: string) => {
+  const themeColor = document.querySelector('meta[name="theme-color"]');
+  if (themeColor) {
+    themeColor.setAttribute("content", color || "#efeff4");
+  }
+};

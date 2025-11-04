@@ -17,6 +17,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 
 // Import Swiper styles
 import { scrambleWord } from '@/utils/game';
+import { setThemeColor } from '@/utils/pwa';
 import 'swiper/css';
 
 interface Question {
@@ -136,14 +137,21 @@ function GameContent() {
             // Correct answer - trigger green background animation
             setScore((prev) => prev + 1);
             setShowCorrectAnimation(true);
+            setThemeColor('#22c55e');
 
             // Show leaderboard after a short delay
             setTimeout(() => {
                 setShowLeaderboard(true);
             }, 800);
+
+            setTimeout(() => {
+                setShowCorrectAnimation(false);
+                setThemeColor();
+            }, 2000);
         } else {
             // Wrong answer - trigger red background animation
             setShowWrongAnimation(true);
+            setThemeColor('#ef4444');
 
             // Clear the input after wrong answer
             setAnswers((prev) => ({
@@ -154,6 +162,7 @@ function GameContent() {
             // Reset animation after 2 seconds for smoother fade back
             setTimeout(() => {
                 setShowWrongAnimation(false);
+                setThemeColor();
             }, 2000);
         }
     };
@@ -178,7 +187,6 @@ function GameContent() {
         }
 
         setShowWordDetails(false);
-        setShowCorrectAnimation(false);
         setShowLeaderboard(false);
 
         if (currentQuestionIndex < questions.length - 1) {
@@ -244,34 +252,27 @@ function GameContent() {
     const wordCountText = currentWordCount === 1 ? '1 word' : `${currentWordCount} words`;
 
     return (
-        <motion.div
-            className="h-screen flex flex-col overflow-hidden"
-            animate={{
-                backgroundColor: showWrongAnimation
-                    ? '#ef4444' // red-500
-                    : showCorrectAnimation
-                        ? '#22c55e' // green-500
-                        : '#f0f9ff', // closest solid color to gradient
-                scale: showWrongAnimation || showCorrectAnimation ? 1.02 : 1,
-            }}
-            transition={{
-                backgroundColor: {
-                    duration: showWrongAnimation || showCorrectAnimation ? 0.2 : 1.5,
-                    ease: showWrongAnimation || showCorrectAnimation ? "easeOut" : "easeInOut",
-                },
-                scale: {
-                    duration: 0.3,
+        <div className="h-screen flex flex-col overflow-hidden relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+            {/* Animated color overlay for correct/wrong feedback */}
+            <motion.div
+                className="fixed inset-0 pointer-events-none z-[1]"
+                initial={{ opacity: 0 }}
+                animate={{
+                    backgroundColor: showWrongAnimation
+                        ? '#ef4444' // red-500
+                        : showCorrectAnimation
+                            ? '#22c55e' // green-500
+                            : 'transparent',
+                    opacity: showWrongAnimation || showCorrectAnimation ? 0.95 : 0,
+                }}
+                transition={{
+                    duration: 0.2,
                     ease: "easeOut",
-                }
-            }}
-            style={{
-                background: !showWrongAnimation && !showCorrectAnimation
-                    ? 'linear-gradient(to bottom right, #dbeafe, #e0e7ff, #f3e8ff)'
-                    : undefined
-            }}
-        >
+                }}
+            />
+
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-white/40 backdrop-blur-xl border-b border-white/60 shadow-md">
+            <div className="relative z-10 flex items-center justify-between px-4 py-3 bg-white/40 backdrop-blur-xl border-b border-white/60 shadow-md">
                 <div className="flex items-center gap-2">
                     <span className="text-gray-800 font-bold text-base">PIN {pin}</span>
                     {/* <span className="text-gray-600 text-sm">👥 0 (1)</span> */}
@@ -304,27 +305,27 @@ function GameContent() {
             </div>
 
             {/* Game Content */}
-            <div className="flex-1 flex flex-col items-center justify-start p-4 overflow-hidden">
+            <div className="relative z-10 flex-1 flex flex-col items-center justify-start p-4">
                 <Swiper
                     spaceBetween={50}
                     slidesPerView={1}
                     onSwiper={setSwiperInstance}
                     onSlideChange={(swiper) => setCurrentQuestionIndex(swiper.activeIndex)}
                     allowTouchMove={false}
-                    className="w-full h-full"
+                    className="w-full h-full !overflow-visible"
                 >
                     {questions.map((question, index) => (
                         <SwiperSlide key={question.id}>
-                            <div className="flex flex-col items-center justify-start h-full space-y-5 pt-2">
+                            <div className="flex flex-col items-center justify-start h-full space-y-3 sm:space-y-5 pt-2">
                                 {/* Title Card */}
-                                <div className="backdrop-blur-xl bg-white/30 rounded-2xl px-6 py-4 border border-white/40 shadow-lg">
-                                    <h2 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                                <div className="backdrop-blur-xl bg-white/30 rounded-2xl px-4 sm:px-6 py-3 sm:py-4 border border-white/40 shadow-lg w-full max-w-md mx-2">
+                                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent text-center break-words">
                                         {question.scrambled}
                                     </h2>
                                 </div>
 
                                 {/* Input and Button */}
-                                <div className="flex gap-3 w-full max-w-md px-2 items-center">
+                                <div className="flex gap-2 sm:gap-3 w-full max-w-md px-2 items-center">
                                     <input
                                         type="text"
                                         value={currentAnswer}
@@ -335,7 +336,7 @@ function GameContent() {
                                             }
                                         }}
                                         placeholder="Type your answer..."
-                                        className="flex-1 px-5 py-3 rounded-full backdrop-blur-xl bg-white/60 text-gray-800 border-2 border-white/60 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 text-base font-medium shadow-md placeholder:text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="flex-1 px-3 sm:px-5 py-2.5 sm:py-3 rounded-full backdrop-blur-xl bg-white/60 text-gray-800 border-2 border-white/60 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 text-sm sm:text-base font-medium shadow-md placeholder:text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed min-w-0"
                                         autoFocus={index === currentQuestionIndex}
                                         disabled={showCorrectAnimation}
                                     />
@@ -350,7 +351,7 @@ function GameContent() {
                                             duration: 0.3,
                                             ease: "easeOut"
                                         }}
-                                        className="px-6 py-3 rounded-full font-bold text-lg text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[80px]"
+                                        className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-full font-bold text-base sm:text-lg text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[60px] sm:min-w-[80px] flex-shrink-0"
                                     >
                                         {showCorrectAnimation ? (
                                             <motion.div
@@ -358,7 +359,7 @@ function GameContent() {
                                                 animate={{ scale: 1, rotate: 0 }}
                                                 transition={{ duration: 0.4, ease: "easeOut" }}
                                             >
-                                                <Check size={24} />
+                                                <Check size={20} className="sm:w-6 sm:h-6" />
                                             </motion.div>
                                         ) : (
                                             'Try'
@@ -414,7 +415,7 @@ function GameContent() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: "100%" }}
                         transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                        className="fixed bottom-0 left-0 right-0 backdrop-blur-xl bg-white/40 rounded-t-3xl shadow-2xl border-t-2 border-white/60 z-50 max-h-[70vh] overflow-y-auto"
+                        className="fixed bottom-0 left-0 right-0 backdrop-blur-xl bg-white/40 rounded-t-3xl shadow-2xl border-t-2 border-white/60 z-50 max-h-[95vh] overflow-y-auto"
                     >
                         <div className="p-6 space-y-4">
                             {/* Header */}
@@ -514,7 +515,7 @@ function GameContent() {
                         animate={{ y: 0 }}
                         exit={{ y: "100%" }}
                         transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                        className="fixed bottom-0 left-0 right-0 backdrop-blur-xl bg-white/40 rounded-t-3xl shadow-2xl border-t-2 border-white/60 z-50 max-h-[60vh] overflow-y-auto"
+                        className="fixed bottom-0 left-0 right-0 backdrop-blur-xl bg-white/40 rounded-t-3xl shadow-2xl border-t-2 border-white/60 z-50 max-h-[95vh] overflow-y-auto"
                     >
                         <div className="p-6 space-y-4">
                             {/* Header */}
@@ -610,7 +611,7 @@ function GameContent() {
                 )
                 }
             </AnimatePresence >
-        </motion.div >
+        </div >
     );
 }
 
