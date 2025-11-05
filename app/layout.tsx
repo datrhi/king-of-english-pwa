@@ -2,6 +2,7 @@ import KonstaWrapper from "@/components/KonstaWrapper";
 import { ViewTransitions } from "@/lib/next-view-transitions";
 import { DialogProvider } from "@/providers/DialogProvider";
 import QueryProvider from "@/providers/QueryProvider";
+import { Provider } from "jotai";
 import type { Metadata, Viewport } from "next";
 import { type ReactNode } from "react";
 import "./globals.css";
@@ -52,17 +53,19 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <KonstaWrapper>
-      <ViewTransitions>
-        <QueryProvider>
-          <DialogProvider>
-            <html lang="en" dir="ltr">
-              <Head />
-              <body data-mode="light">{children}</body>
-            </html>
-          </DialogProvider>
-        </QueryProvider>
-      </ViewTransitions>
-    </KonstaWrapper>
+    <Provider>
+      <KonstaWrapper>
+        <ViewTransitions>
+          <QueryProvider>
+            <DialogProvider>
+              <html lang="en" dir="ltr">
+                <Head />
+                <body data-mode="light">{children}</body>
+              </html>
+            </DialogProvider>
+          </QueryProvider>
+        </ViewTransitions>
+      </KonstaWrapper>
+    </Provider>
   );
 }

@@ -1,7 +1,9 @@
-export { GameHeader } from "./GameHeader";
-export { Leaderboard } from "./Leaderboard";
-export type { LeaderboardPlayer } from "./Leaderboard";
-export { PointsAnimation } from "./PointsAnimation";
-export { ProgressBar } from "./ProgressBar";
-export { QuestionCard } from "./QuestionCard";
-export { WordDetails } from "./WordDetails";
+export { Backdrop } from "./Backdrop";
+export { ColorOverlay } from "./ColorOverlay";
+export { GameContent, type GameContentRef } from "./GameContent";
+export { GameHeaderComponent } from "./GameHeader";
+export { GameLeaderboard } from "./Leaderboard";
+export { GamePointsAnimation } from "./PointsAnimation";
+export { GameProgressBar, type GameProgressBarRef } from "./ProgressBar";
+export { GameQuestionCard } from "./QuestionCard";
+export { GameWordDetails } from "./WordDetails";

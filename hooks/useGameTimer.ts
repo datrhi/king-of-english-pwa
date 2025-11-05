@@ -1,3 +1,4 @@
+import { useStateRef } from "@/lib/use-state-ref/useStateRef";
 import { useEffect, useRef, useState } from "react";
 
 interface UseGameTimerProps {
@@ -8,6 +9,7 @@ interface UseGameTimerProps {
 export interface UseGameTimerReturn {
   questionProgress: number;
   questionStartTime: number | null;
+  questionProgressRef: React.RefObject<number>;
   stopTimer: () => void;
 }
 
@@ -15,7 +17,8 @@ export function useGameTimer({
   shouldRun,
   onTimeOut,
 }: UseGameTimerProps): UseGameTimerReturn {
-  const [questionProgress, setQuestionProgress] = useState(1000);
+  const [questionProgress, setQuestionProgress, questionProgressRef] =
+    useStateRef(1000);
   const [questionStartTime, setQuestionStartTime] = useState<number | null>(
     null
   );
@@ -64,6 +67,7 @@ export function useGameTimer({
   return {
     questionProgress,
     questionStartTime,
+    questionProgressRef,
     stopTimer,
   };
 }
