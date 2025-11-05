@@ -8,6 +8,7 @@ import { WordDetails } from '@/components/game/WordDetails';
 import { useGameState } from '@/hooks/useGameState';
 import { useGameTimer } from '@/hooks/useGameTimer';
 import { useLeaderboardTimer } from '@/hooks/useLeaderboardTimer';
+import { useRoomConnection } from '@/hooks/useRoomConnection';
 import { useRandomWords } from '@/hooks/useWords';
 import { useTransitionRouter } from '@/lib/next-view-transitions';
 import { useDialog } from '@/providers/DialogProvider';
@@ -49,6 +50,12 @@ function GameContent() {
     // Game state
     const gameState = useGameState();
     const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
+
+    // Manage WebSocket connection lifecycle (persist when navigating within game flow)
+    const { markAsExiting } = useRoomConnection({
+        pin,
+        persistOnNavigation: true
+    });
 
     // Convert words to questions
     const questions: Question[] = useMemo(() => {
@@ -138,7 +145,10 @@ function GameContent() {
                     content: `You scored ${gameState.score} points! Would you like to play again?`,
                     title: '🎮 Game Over',
                     onConfirm: () => router.refresh(),
-                    onCancel: () => router.reset('/?source=pwa'),
+                    onCancel: () => {
+                        markAsExiting();
+                        router.reset('/?source=pwa');
+                    },
                     cancelText: 'Exit',
                     confirmText: 'Play Again',
                 });
@@ -150,6 +160,7 @@ function GameContent() {
         swiperInstance,
         showConfirm,
         router,
+        markAsExiting,
     ]);
 
     const { progress: leaderboardProgress } = useLeaderboardTimer({
@@ -163,12 +174,15 @@ function GameContent() {
         if (error) {
             showAlert({
                 content: 'Failed to load game questions. Please try again.',
-                onConfirm: () => router.reset('/?source=pwa'),
+                onConfirm: () => {
+                    markAsExiting();
+                    router.reset('/?source=pwa');
+                },
                 title: 'Error',
                 disableBackdropClick: true,
             });
         }
-    }, [error, showAlert, router]);
+    }, [error, showAlert, router, markAsExiting]);
 
     // Handlers
     const handleAnswerChange = useCallback(
@@ -205,8 +219,9 @@ function GameContent() {
     }, [gameState]);
 
     const handleSettings = useCallback(() => {
+        markAsExiting();
         router.reset('/?source=pwa');
-    }, [router]);
+    }, [router, markAsExiting]);
 
     // Loading state
     if (isLoading) {
@@ -223,7 +238,10 @@ function GameContent() {
             <div className="flex items-center justify-center h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
                 <Card className="p-6 text-center backdrop-blur-xl bg-white/30 border border-white/40 shadow-xl">
                     <p className="text-lg mb-4 text-gray-700 font-medium">No questions available</p>
-                    <Button onClick={() => router.reset('/?source=pwa')}>Go Back</Button>
+                    <Button onClick={() => {
+                        markAsExiting();
+                        router.reset('/?source=pwa');
+                    }}>Go Back</Button>
                 </Card>
             </div>
         );

@@ -1,11 +1,10 @@
 "use client";
 import Lobby from '@/components/Lobby';
+import { useRoomConnection } from '@/hooks/useRoomConnection';
 import { useTransitionRouter } from '@/lib/next-view-transitions';
 import { useDialog } from '@/providers/DialogProvider';
 import {
-    disconnectRoomSocket,
     joinRoom,
-    leaveRoom,
     offRoomClosed,
     offUserJoined,
     offUserLeft,
@@ -42,6 +41,12 @@ function LobbyContent() {
     const [currentUserId, setCurrentUserId] = useState<string>('');
     const [isHost, setIsHost] = useState(false);
     const [loading, setLoading] = useState(true);
+
+    // Manage WebSocket connection lifecycle (persist when navigating to game)
+    const { markAsExiting } = useRoomConnection({
+        pin,
+        persistOnNavigation: true
+    });
 
     // Join room on mount
     useEffect(() => {
@@ -103,6 +108,8 @@ function LobbyContent() {
         // Listen for room closed event (when host leaves)
         onRoomClosed((data) => {
             console.log('Room closed:', data);
+            // Mark as exiting to trigger cleanup
+            markAsExiting();
             // Show message and redirect
             showAlert({
                 content: data.message,
@@ -110,25 +117,24 @@ function LobbyContent() {
                 title: 'Room Closed',
                 disableBackdropClick: true,
             });
-            disconnectRoomSocket();
             // Redirect after a short delay
             setTimeout(() => {
                 router.push('/');
             }, 2000);
         });
 
-        // Cleanup
+        // Cleanup - remove event listeners (connection handled by useRoomConnection)
         return () => {
             offUserJoined();
             offUserLeft();
             offRoomClosed();
-            leaveRoom(rawPin);
         };
     }, [pin, userName, userAvatar]);
 
     const handleStartGame = () => {
         console.log('Starting game...');
         // Navigate to game screen with necessary params
+        // (connection persists due to persistOnNavigation: true)
         const rawPin = pin.replace(/\s/g, '');
         const params = new URLSearchParams({
             pin: rawPin,
@@ -143,13 +149,8 @@ function LobbyContent() {
     const handleExitLobby = () => {
         console.log('Exiting lobby...');
 
-        const rawPin = pin.replace(/\s/g, '');
-
-        // Leave room via socket (backend will auto-delete if host)
-        leaveRoom(rawPin);
-
-        // Disconnect from WebSocket
-        disconnectRoomSocket();
+        // Mark as intentionally exiting to trigger cleanup
+        markAsExiting();
 
         // Navigate back to home screen
         router.back();
