@@ -43,6 +43,9 @@ const nextConfig = {
     contentDispositionType: "attachment",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
+  experimental: {
+    reactCompiler: true,
+  },
 };
 
 export default withSerwist(nextConfig);
