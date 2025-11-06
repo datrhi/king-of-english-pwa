@@ -1,3 +1,4 @@
+import { RoomEvent, useEmitRoomEvent } from "@/hooks/useRoomEventSync";
 import {
   currentAnswerAtom,
   currentQuestionIndexAtom,
@@ -142,6 +143,8 @@ export function GameQuestionCard({
   const showCorrectAnimation = useAtomValue(showCorrectAnimationAtom);
   const handleCorrectAnswer = useSetAtom(handleCorrectAnswerAtom);
   const handleWrongAnswer = useSetAtom(handleWrongAnswerAtom);
+  const { notifyAll } = useEmitRoomEvent();
+
   const getWordCount = (text: string): number => {
     const trimmed = text.trim();
     if (!trimmed) return 0;
@@ -154,13 +157,18 @@ export function GameQuestionCard({
 
   const handleTryAnswer = () => {
     const correctAnswer = question.answer;
-    const questionProgress = getCurrentProgress();
-
-    stopTimer();
 
     if (currentAnswer === correctAnswer) {
-      handleCorrectAnswer(questionProgress);
+      const questionProgress = getCurrentProgress();
+      const earnedPoints = Math.round(questionProgress);
+      // for update the score in leaderboard
+      notifyAll(RoomEvent.CORRECT_ANSWER, earnedPoints);
+      // local handler
+      handleCorrectAnswer(earnedPoints);
     } else {
+      // for update the score in leaderboard
+      notifyAll(RoomEvent.WRONG_ANSWER, currentAnswer);
+      // local handler
       handleWrongAnswer();
     }
   };

@@ -13,10 +13,10 @@ export const ColorOverlay = () => {
       className="fixed inset-0 pointer-events-none z-[1]"
       initial={{ opacity: 0 }}
       animate={{
-        backgroundColor: showWrongAnimation
-          ? "#ef4444"
-          : showCorrectAnimation
+        backgroundColor: showCorrectAnimation
           ? "#22c55e"
+          : showWrongAnimation
+          ? "#ef4444"
           : "transparent",
         opacity: showWrongAnimation || showCorrectAnimation ? 0.95 : 0,
       }}

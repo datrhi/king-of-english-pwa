@@ -1,12 +1,13 @@
+import { RoomEvent, useEmitRoomEvent } from "@/hooks/useRoomEventSync";
 import {
   currentQuestionIndexAtom,
-  showLeaderboardActionAtom,
   showWordDetailsAtom,
 } from "@/stores/gameStore";
 import { Question } from "@/types/game";
 import { AnimatePresence, motion } from "framer-motion";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import { ChevronRight, Volume2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useRef } from "react";
 
 interface WordDetailsProps {
@@ -127,12 +128,19 @@ export function WordDetails({
 }
 
 export function GameWordDetails({
-  isHost,
   questions,
-}: Pick<WordDetailsProps, "isHost"> & { questions: Question[] | null }) {
+}: {
+  questions: Question[] | null;
+}) {
   const showWordDetails = useAtomValue(showWordDetailsAtom);
   const currentQuestionIndex = useAtomValue(currentQuestionIndexAtom);
-  const handleShowLeaderboard = useSetAtom(showLeaderboardActionAtom);
+  const { emitEvent } = useEmitRoomEvent();
+  const isHost = useSearchParams().get("isHost") === "true";
+  // Handle show leaderboard - host emits event, everyone reacts
+  const handleShowLeaderboard = () => {
+    emitEvent(RoomEvent.SHOW_LEADERBOARD);
+  };
+
   const currentQuestion = questions?.[currentQuestionIndex];
   if (!currentQuestion) return null;
   return (

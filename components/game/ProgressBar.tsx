@@ -1,13 +1,13 @@
 import { useGameTimer } from "@/hooks/useGameTimer";
+import { RoomEvent, useEmitRoomEvent } from "@/hooks/useRoomEventSync";
 import {
-  handleTimeOutAtom,
+  currentQuestionIndexAtom,
   isGameOverAtom,
-  showCorrectAnimationAtom,
   showLeaderboardAtom,
   showWordDetailsAtom,
 } from "@/stores/gameStore";
 import { motion } from "framer-motion";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import { forwardRef, useImperativeHandle } from "react";
 
 interface ProgressBarProps {
@@ -47,7 +47,7 @@ export function ProgressBar({ progress }: ProgressBarProps) {
 }
 
 interface GameProgressBarProps {
-  isGotQuestions: boolean;
+  index: number;
 }
 export interface GameProgressBarRef {
   stopTimer: () => void;
@@ -56,12 +56,17 @@ export interface GameProgressBarRef {
 export const GameProgressBar = forwardRef<
   GameProgressBarRef,
   GameProgressBarProps
->(({ isGotQuestions }, ref) => {
+>(({ index }, ref) => {
   const showLeaderboard = useAtomValue(showLeaderboardAtom);
   const showWordDetails = useAtomValue(showWordDetailsAtom);
-  const showCorrectAnimation = useAtomValue(showCorrectAnimationAtom);
+  const currentQuestionIndex = useAtomValue(currentQuestionIndexAtom);
   const isGameOver = useAtomValue(isGameOverAtom);
-  const handleTimeOut = useSetAtom(handleTimeOutAtom);
+  const { emitEvent } = useEmitRoomEvent();
+  const isCurrentQuestion = index === currentQuestionIndex;
+
+  const handleTimeOut = () => {
+    emitEvent(RoomEvent.SHOW_WORD_DETAILS);
+  };
 
   const {
     questionProgress: progress,
@@ -69,17 +74,15 @@ export const GameProgressBar = forwardRef<
     questionProgressRef,
   } = useGameTimer({
     shouldRun:
-      !showLeaderboard &&
-      !showWordDetails &&
-      !showCorrectAnimation &&
-      !isGameOver &&
-      isGotQuestions,
+      !showLeaderboard && !showWordDetails && !isGameOver && isCurrentQuestion,
     onTimeOut: handleTimeOut,
   });
 
   useImperativeHandle(ref, () => ({
     stopTimer,
-    getCurrentProgress: () => questionProgressRef.current,
+    getCurrentProgress: () => {
+      return questionProgressRef.current;
+    },
   }));
 
   return (

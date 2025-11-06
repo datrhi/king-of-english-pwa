@@ -29,6 +29,8 @@ export interface RoomUser {
   id: string;
   name: string;
   avatar?: string;
+  isHost: boolean;
+  isMe: boolean;
 }
 
 export interface Exercise {
@@ -171,5 +173,80 @@ export const disconnectRoomSocket = () => {
   if (socket) {
     socket.disconnect();
     socket = null;
+  }
+};
+
+/**
+ * Emit a room event (typically used by host)
+ */
+export const emitRoomEvent = (
+  pinCode: string,
+  action: string,
+  data?: unknown
+): void => {
+  const roomSocket = getRoomSocket();
+  if (roomSocket) {
+    roomSocket.emit("roomEvent", {
+      pinCode,
+      action,
+      data,
+    });
+  }
+};
+
+/**
+ * Listen for room events
+ */
+export const onRoomEvent = (
+  callback: (data: {
+    pinCode: string;
+    userId?: string;
+    username?: string;
+    action: string;
+    data: unknown;
+    socketId: string;
+  }) => void
+) => {
+  const roomSocket = getRoomSocket();
+  if (roomSocket) {
+    roomSocket.on("roomEvent", callback);
+  }
+};
+
+/**
+ * Remove room event listener
+ */
+export const offRoomEvent = () => {
+  const roomSocket = getRoomSocket();
+  if (roomSocket) {
+    roomSocket.off("roomEvent");
+  }
+};
+
+export const onRoomUsers = (
+  callback: (data: {
+    pinCode: string;
+    users: RoomUser[];
+    count: number;
+    socketId: string;
+  }) => void
+) => {
+  const roomSocket = getRoomSocket();
+  if (roomSocket) {
+    roomSocket.on("roomUsers", callback);
+  }
+};
+
+export const offRoomUsers = () => {
+  const roomSocket = getRoomSocket();
+  if (roomSocket) {
+    roomSocket.off("roomUsers");
+  }
+};
+
+export const emitGetRoomUsers = (pinCode: string) => {
+  const roomSocket = getRoomSocket();
+  if (roomSocket) {
+    roomSocket.emit("getRoomUsers", { pinCode });
   }
 };

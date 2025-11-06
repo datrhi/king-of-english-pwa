@@ -1,27 +1,28 @@
 import { useLeaderboardTimer } from "@/hooks/useLeaderboardTimer";
-import { useDialog } from "@/providers/DialogProvider";
+import { RoomEvent, useEmitRoomEvent } from "@/hooks/useRoomEventSync";
 import {
   currentQuestionIndexAtom,
   isGameOverAtom,
-  scoreAtom,
+  leaderboardPlayersAtom,
   showLeaderboardAtom,
 } from "@/stores/gameStore";
 import { AnimatePresence, motion } from "framer-motion";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { Crown, Medal, Trophy } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect } from "react";
 
 export interface LeaderboardPlayer {
   id: string;
   name: string;
   score: number;
-  isCurrentUser: boolean;
+  isMe: boolean;
 }
 
 interface LeaderboardProps {
   show: boolean;
   players: LeaderboardPlayer[];
   handleLeaderboardComplete: () => void;
+  showProgressBar: boolean;
 }
 
 const ProgressBar = function ProgressBar({
@@ -79,7 +80,7 @@ const LeaderboardList = function LeaderboardList({
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.4 + index * 0.1 }}
           className={`flex items-center gap-4 p-4 rounded-2xl backdrop-blur-xl shadow-lg ${
-            player.isCurrentUser
+            player.isMe
               ? "bg-gradient-to-r from-indigo-100/60 to-purple-100/60 border-2 border-indigo-400/60"
               : "bg-white/30 border border-white/40"
           }`}
@@ -115,18 +116,18 @@ const LeaderboardList = function LeaderboardList({
           <div className="flex-1">
             <p
               className={`font-bold text-base ${
-                player.isCurrentUser ? "text-indigo-700" : "text-gray-800"
+                player.isMe ? "text-indigo-700" : "text-gray-800"
               }`}
             >
               {player.name}
-              {player.isCurrentUser && " 👤"}
+              {player.isMe && " 👤"}
             </p>
           </div>
 
           {/* Score */}
           <div
             className={`text-right font-bold text-xl ${
-              player.isCurrentUser ? "text-indigo-700" : "text-gray-700"
+              player.isMe ? "text-indigo-700" : "text-gray-700"
             }`}
           >
             {player.score}
@@ -142,6 +143,7 @@ export function Leaderboard({
   show,
   players,
   handleLeaderboardComplete,
+  showProgressBar = true,
 }: LeaderboardProps) {
   return (
     <AnimatePresence>
@@ -182,9 +184,11 @@ export function Leaderboard({
               </motion.p>
 
               {/* Progress Bar */}
-              <ProgressBar
-                handleLeaderboardComplete={handleLeaderboardComplete}
-              />
+              {showProgressBar && (
+                <ProgressBar
+                  handleLeaderboardComplete={handleLeaderboardComplete}
+                />
+              )}
             </div>
 
             {/* Leaderboard List - Memoized to prevent re-renders from progress updates */}
@@ -198,72 +202,33 @@ export function Leaderboard({
 
 export function GameLeaderboard({
   questionsLength,
-  nextSlide,
   onExit,
 }: {
   questionsLength: number;
-  nextSlide: () => void;
   onExit: () => void;
 }) {
-  const [show, setShowLeaderboard] = useAtom(showLeaderboardAtom);
-  const score = useAtomValue(scoreAtom);
+  const show = useAtomValue(showLeaderboardAtom);
   const currentQuestionIndex = useAtomValue(currentQuestionIndexAtom);
+  const leaderboardPlayers = useAtomValue(leaderboardPlayersAtom);
   const setIsGameOver = useSetAtom(isGameOverAtom);
-  const { showAlert } = useDialog();
+  const { emitEvent } = useEmitRoomEvent();
+
+  useEffect(() => {
+    if (currentQuestionIndex === questionsLength - 1) {
+      setIsGameOver(true);
+    }
+  }, [currentQuestionIndex, questionsLength, setIsGameOver]);
 
   const handleLeaderboardComplete = () => {
-    setShowLeaderboard(false);
-
-    if (currentQuestionIndex < questionsLength - 1) {
-      setTimeout(() => {
-        nextSlide();
-      }, 100);
-    } else {
-      setIsGameOver(true);
-      setTimeout(() => {
-        showAlert({
-          content: `You scored ${score} points!`,
-          title: "🎮 Game Over",
-          onConfirm: onExit,
-        });
-      }, 300);
-    }
+    emitEvent(RoomEvent.NEXT_QUESTION);
   };
-
-  const leaderboardData: LeaderboardPlayer[] = useMemo(() => {
-    return [
-      {
-        id: "1",
-        name: "You",
-        score: score,
-        isCurrentUser: true,
-      },
-      {
-        id: "2",
-        name: "Player 2",
-        score: Math.max(0, Math.floor(score * 0.9)),
-        isCurrentUser: false,
-      },
-      {
-        id: "3",
-        name: "Player 3",
-        score: Math.max(0, Math.floor(score * 0.8)),
-        isCurrentUser: false,
-      },
-      {
-        id: "4",
-        name: "Player 4",
-        score: Math.max(0, Math.floor(score * 0.7)),
-        isCurrentUser: false,
-      },
-    ].sort((a, b) => b.score - a.score);
-  }, [score]);
 
   return (
     <Leaderboard
       show={show}
-      players={leaderboardData}
+      players={leaderboardPlayers}
       handleLeaderboardComplete={handleLeaderboardComplete}
+      showProgressBar={currentQuestionIndex < questionsLength - 1}
     />
   );
 }

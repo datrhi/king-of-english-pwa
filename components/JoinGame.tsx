@@ -9,22 +9,34 @@ export default function JoinGame() {
   const router = useTransitionRouter();
 
   const handleSubmit = async () => {
-    if (pin.trim()) {
+    const rawPin = pin.replace(/\s/g, "");
+    // Validate PIN is exactly 6 numbers
+    if (rawPin.length === 6 && /^\d{6}$/.test(rawPin)) {
       const name = await getUsername();
-      const rawPin = pin.replace(/\s/g, "");
       // Navigate to lobby - backend will determine if user is host
-      router.push(
-        `/lobby?pin=${rawPin}&name=${encodeURIComponent(name)}`
-      );
+      const params = new URLSearchParams({
+        pin: rawPin,
+        name,
+        isHost: "false",
+      });
+      router.push(`/lobby?${params.toString()}`);
     }
   };
 
   const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    // Only allow numbers and spaces
+    const filtered = value.replace(/[^\d\s]/g, "");
     // Format PIN with space (e.g., "123 456")
-    if (value.length < 7) {
-      setPin(value);
+    if (filtered.length <= 7) {
+      setPin(filtered);
     }
+  };
+
+  // Check if PIN is valid (exactly 6 digits)
+  const isValidPin = () => {
+    const rawPin = pin.replace(/\s/g, "");
+    return rawPin.length === 6 && /^\d{6}$/.test(rawPin);
   };
 
   return (
@@ -43,12 +55,7 @@ export default function JoinGame() {
             maxLength={7}
           />
         </div>
-        <Button
-          large
-          rounded
-          onClick={handleSubmit}
-          disabled={!pin.trim()}
-        >
+        <Button large rounded onClick={handleSubmit} disabled={!isValidPin()}>
           Join Game
         </Button>
       </div>

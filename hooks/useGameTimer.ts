@@ -1,4 +1,3 @@
-import { useStateRef } from "@/lib/use-state-ref/useStateRef";
 import { useEffect, useRef, useState } from "react";
 
 interface UseGameTimerProps {
@@ -17,8 +16,8 @@ export function useGameTimer({
   shouldRun,
   onTimeOut,
 }: UseGameTimerProps): UseGameTimerReturn {
-  const [questionProgress, setQuestionProgress, questionProgressRef] =
-    useStateRef(1000);
+  const [questionProgress, setQuestionProgress] = useState(1000);
+  const questionProgressRef = useRef(1000);
   const [questionStartTime, setQuestionStartTime] = useState<number | null>(
     null
   );
@@ -42,11 +41,13 @@ export function useGameTimer({
       const startTime = Date.now();
       setQuestionStartTime(startTime);
       setQuestionProgress(1000);
+      questionProgressRef.current = 1000; // Update ref immediately
 
       const interval = setInterval(() => {
         const elapsed = Date.now() - startTime;
         const newProgress = Math.max(0, 1000 - elapsed / 10);
         setQuestionProgress(newProgress);
+        questionProgressRef.current = newProgress; // Update ref synchronously
 
         if (newProgress <= 0) {
           clearInterval(interval);

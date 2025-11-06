@@ -1,0 +1,82 @@
+import {
+  emitRoomEvent,
+  offRoomEvent,
+  onRoomEvent,
+} from "@/services/socketService";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useRef } from "react";
+
+export interface RoomEventData {
+  pinCode: string;
+  userId?: string;
+  username?: string;
+  action: string;
+  data: unknown;
+  socketId: string;
+}
+
+export interface UseRoomEventSyncProps {
+  onEvent: (eventData: RoomEventData) => void;
+}
+
+export enum RoomEvent {
+  DISTRIBUTE_WORDS = "distribute_words",
+  CORRECT_ANSWER = "correct_answer",
+  WRONG_ANSWER = "wrong_answer",
+  SHOW_WORD_DETAILS = "show_word_details",
+  SHOW_LEADERBOARD = "show_leaderboard",
+  NEXT_QUESTION = "next_question",
+}
+
+/**
+ * Hook for synchronizing room state through room events.
+ * - Host can emit events using the returned `emitEvent` function
+ * - All users (including host) will receive events through `onEvent` callback
+ * This ensures everyone stays in sync regardless of role
+ */
+export function useRoomEventSync({ onEvent }: UseRoomEventSyncProps) {
+  const onEventRef = useRef(onEvent);
+
+  // Update ref when callback changes
+  useEffect(() => {
+    onEventRef.current = onEvent;
+  }, [onEvent]);
+
+  useEffect(() => {
+    onRoomEvent((eventData) => {
+      console.log(`[RoomEventSync] Received event:`, eventData);
+      onEventRef.current(eventData);
+    });
+
+    return () => {
+      offRoomEvent();
+    };
+  }, []);
+}
+
+export function useEmitRoomEvent() {
+  const searchParams = useSearchParams();
+  const pin = searchParams.get("pin") || "000000";
+  const isHost = searchParams.get("isHost") === "true";
+  const emitEvent = useCallback(
+    (action: string, data?: unknown) => {
+      if (!isHost) {
+        console.warn(
+          `[RoomEventSync] Non-host attempted to emit event: ${action}`
+        );
+        return;
+      }
+      emitRoomEvent(pin.replace(/\s/g, ""), action, data);
+    },
+    [pin, isHost]
+  );
+
+  const notifyAll = useCallback(
+    (action: string, data?: unknown) => {
+      emitRoomEvent(pin.replace(/\s/g, ""), action, data);
+    },
+    [pin]
+  );
+
+  return { emitEvent, notifyAll };
+}
