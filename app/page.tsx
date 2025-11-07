@@ -1,5 +1,4 @@
 "use client";
-import AutoInstall from "@/components/AutoInstall";
 import CourseList from "@/components/CourseList";
 import InstallIntroduction from "@/components/InstallIntroduction";
 import JoinGame from "@/components/JoinGame";
@@ -28,12 +27,25 @@ function TabbarPageContent() {
   const searchParams = useSearchParams();
   const source = searchParams.get("source");
   const [isInStandalone, setIsInStandalone] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     setIsInStandalone(isInStandaloneMode() as boolean);
+    setIsInitialized(true);
   }, []);
 
-  if (source === "pwa" || isInStandalone) {
+  if (!isInitialized) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Preloader />
+      </div>
+    );
+  }
+
+  if (
+    (source === "pwa" && process.env.NODE_ENV === "development") ||
+    isInStandalone
+  ) {
     return (
       <ScreenWithBackground
         headerProps={{
@@ -62,20 +74,6 @@ function TabbarPageContent() {
         {activeTab === "explore" && <CourseList />}
 
         {activeTab === "join" && <JoinGame />}
-      </ScreenWithBackground>
-    );
-  }
-  // Handle auto-install screen
-  if (source === "install") {
-    return (
-      <ScreenWithBackground
-        headerProps={{
-          title: "Installing...",
-        }}
-        view="scrollable"
-        contentPosition="center"
-      >
-        <AutoInstall />
       </ScreenWithBackground>
     );
   }
