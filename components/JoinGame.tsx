@@ -1,6 +1,5 @@
 "use client";
 import { useTransitionRouter } from "@/lib/next-view-transitions";
-import { getUsername } from "@/services/userService";
 import { Button } from "konsta/react";
 import { useState } from "react";
 
@@ -8,15 +7,13 @@ export default function JoinGame() {
   const [pin, setPin] = useState("");
   const router = useTransitionRouter();
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     const rawPin = pin.replace(/\s/g, "");
     // Validate PIN is exactly 6 numbers
     if (rawPin.length === 6 && /^\d{6}$/.test(rawPin)) {
-      const name = await getUsername();
       // Navigate to lobby - backend will determine if user is host
       const params = new URLSearchParams({
         pin: rawPin,
-        name,
         isHost: "false",
       });
       router.push(`/lobby?${params.toString()}`);

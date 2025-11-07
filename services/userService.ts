@@ -43,6 +43,15 @@ export const getUsername = async (): Promise<string> => {
 };
 
 /**
+ * Save username to session storage
+ */
+export const saveUsername = (username: string): void => {
+  if (typeof window !== "undefined") {
+    sessionStorage.setItem(USERNAME_KEY, username);
+  }
+};
+
+/**
  * Get avatar URL based on username
  */
 export const getAvatarUrl = (username: string): string => {

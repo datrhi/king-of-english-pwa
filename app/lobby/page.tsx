@@ -13,11 +13,19 @@ import {
   offRoomClosed,
   offUserJoined,
   offUserLeft,
+  offUserUpdated,
   onRoomClosed,
   onUserJoined,
   onUserLeft,
+  onUserUpdated,
   RoomUser,
+  updateUser,
 } from "@/services/socketService";
+import {
+  getAvatarUrl,
+  getUsername,
+  saveUsername,
+} from "@/services/userService";
 import { Preloader } from "konsta/react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
@@ -25,12 +33,11 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 function LobbyContent() {
   const router = useTransitionRouter();
   const searchParams = useSearchParams();
-  const { showAlert } = useDialog();
+  const { showAlert, showInput } = useDialog();
 
   // Get params from URL
   const pin = searchParams.get("pin") || "000000";
   const userName = searchParams.get("name") || "Guest";
-  const userAvatar = searchParams.get("avatar") || "";
   const isHost = searchParams.get("isHost") === "true";
 
   // State
@@ -91,7 +98,8 @@ function LobbyContent() {
   useEffect(() => {
     const initRoom = async () => {
       try {
-        const result = await joinRoom(pin, userName, userAvatar);
+        const userName = await getUsername();
+        const result = await joinRoom(pin, userName, getAvatarUrl(userName));
 
         if (result.success && result.data) {
           setIsInitialized(true);
@@ -123,7 +131,9 @@ function LobbyContent() {
     };
 
     void initRoom();
+  }, [pin]);
 
+  useEffect(() => {
     // Listen for real-time user updates
     onUserJoined((data) => {
       console.log("User joined:", data);
@@ -139,6 +149,19 @@ function LobbyContent() {
     onUserLeft((data) => {
       console.log("User left:", data);
       setUsers((prev) => prev.filter((u) => u.id !== data.user.id));
+    });
+
+    onUserUpdated((data) => {
+      console.log("User updated:", data);
+      setUsers((prev) => {
+        const userIndex = prev.findIndex((u) => u.id === data.user.id);
+        if (userIndex !== -1) {
+          const updated = [...prev];
+          updated[userIndex] = data.user;
+          return updated;
+        }
+        return prev;
+      });
     });
 
     // Listen for room closed event (when host leaves)
@@ -159,9 +182,10 @@ function LobbyContent() {
     return () => {
       offUserJoined();
       offUserLeft();
+      offUserUpdated();
       offRoomClosed();
     };
-  }, [pin, userName, userAvatar]);
+  }, [isInitialized]);
 
   const handleStartGame = () => {
     console.log("[Lobby] Host starting game...");
@@ -182,7 +206,48 @@ function LobbyContent() {
 
   const handleEditCharacter = () => {
     console.log("Editing character...");
-    // TODO: Open character editor
+    // Find current user
+    const currentUser = users.find((u) => u.isMe);
+    const currentName = currentUser?.name;
+
+    showInput({
+      title: "Edit Character",
+      content: "Enter your new username:",
+      placeholder: "Username",
+      defaultValue: currentName,
+      maxLength: 20,
+      confirmText: "Save",
+      cancelText: "Cancel",
+      onConfirm: (newName) => {
+        const trimmedName = newName.trim();
+        if (!trimmedName) {
+          showAlert({
+            title: "Invalid Username",
+            content: "Username cannot be empty.",
+          });
+          return;
+        }
+
+        if (trimmedName.length < 2) {
+          showAlert({
+            title: "Invalid Username",
+            content: "Username must be at least 2 characters long.",
+          });
+          return;
+        }
+
+        // Save to session storage
+        saveUsername(trimmedName);
+
+        // Update avatar URL based on new username
+        const newAvatar = getAvatarUrl(trimmedName);
+
+        // Update user in the room
+        updateUser(pin, trimmedName, newAvatar);
+
+        console.log("Username updated to:", trimmedName);
+      },
+    });
   };
 
   const handleShare = async () => {

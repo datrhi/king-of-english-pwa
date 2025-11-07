@@ -250,3 +250,39 @@ export const emitGetRoomUsers = (pinCode: string) => {
     roomSocket.emit("getRoomUsers", { pinCode });
   }
 };
+
+/**
+ * Update user information (name and/or avatar) in a room
+ */
+export const updateUser = (
+  pinCode: string,
+  name: string,
+  avatar?: string
+): void => {
+  const roomSocket = getRoomSocket();
+  if (roomSocket) {
+    roomSocket.emit("updateUser", { pinCode, name, avatar });
+  }
+};
+
+/**
+ * Listen for when a user's information is updated
+ */
+export const onUserUpdated = (
+  callback: (data: { pinCode: string; user: RoomUser }) => void
+) => {
+  const roomSocket = getRoomSocket();
+  if (roomSocket) {
+    roomSocket.on("userUpdated", callback);
+  }
+};
+
+/**
+ * Remove user updated listener
+ */
+export const offUserUpdated = () => {
+  const roomSocket = getRoomSocket();
+  if (roomSocket) {
+    roomSocket.off("userUpdated");
+  }
+};

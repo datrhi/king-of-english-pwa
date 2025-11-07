@@ -4,7 +4,6 @@ import { useExercises } from "@/hooks/useExercises";
 import { useCreateRoom } from "@/hooks/useRooms";
 import { useTransitionRouter } from "@/lib/next-view-transitions";
 import type { Exercise } from "@/services/exercisesApi";
-import { getAvatarUrl, getUsername } from "@/services/userService";
 import { shimmer, toBase64 } from "@/utils/shimmer";
 import {
   Block,
@@ -51,15 +50,9 @@ export default function ExercisesList({ lessonId }: ExercisesListProps) {
     if (!selectedExercise) return;
 
     try {
-      // Get username from session storage or fetch from random user API
-      const username = await getUsername();
-
-      // Get avatar URL
-      const avatarUrl = getAvatarUrl(username);
-
       // Create room with exercise details
       const room = await createRoomMutation.mutateAsync({
-        name: username,
+        name: selectedExercise.name,
         exerciseId: selectedExercise.id,
         image: selectedExercise.image?.startsWith("http")
           ? selectedExercise.image
@@ -71,8 +64,6 @@ export default function ExercisesList({ lessonId }: ExercisesListProps) {
       // Navigate to lobby - the lobby page will handle joining via WebSocket
       const params = new URLSearchParams({
         pin: room.pinCode,
-        name: username,
-        avatar: avatarUrl,
         isHost: "true",
       });
       router.push(`/lobby?${params.toString()}`);
