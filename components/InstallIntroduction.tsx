@@ -3,8 +3,8 @@
 import { usePWAInstall } from "@/lib/pwa-install-handler/usePWAInstall";
 import { isIos } from "@/utils/pwa";
 import { Block, Button } from "konsta/react";
-import { Download, QrCode } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
+import { Download } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import InstallIntroductionIOS from "./InstallIntroductionIOS";
 
@@ -37,44 +37,27 @@ export default function InstallIntroduction() {
   return (
     <div className="flex flex-col items-center justify-center px-6 gap-8">
       <Block className="space-y-6 w-full max-w-md">
-        {/* QR Code Section */}
-        <div className="bg-white p-6 rounded-2xl flex flex-col items-center gap-4">
-          <div className="flex items-center gap-2 text-gray-800">
-            <QrCode size={24} />
-            <span className="font-semibold text-lg">Scan to Share</span>
-          </div>
-          <div className="bg-white p-4 rounded-lg">
-            <QRCodeSVG
-              value={
-                process.env.NEXT_PUBLIC_APP_URL || "https://koe.091200.xyz"
-              }
-              size={200}
-              level="H"
-              marginSize={4}
-            />
-          </div>
-          <p className="text-sm text-gray-600 text-center">
-            Scan this QR code to share the app
-          </p>
-        </div>
-
+        <Image
+          src="/images/icon.png"
+          alt="Install Introduction"
+          width={500}
+          height={500}
+          className="w-full h-full object-contain rounded-lg"
+        />
         {/* Direct Install Button */}
-        {installPWA && (
+        {
           <Button
             large
             onClick={handleInstall}
             className="w-full flex items-center justify-center gap-2"
+            disabled={!installPWA}
           >
             <Download size={20} />
-            <span>Install Now</span>
+            <span>
+              {installPWA ? "Install Now" : "App is already installed"}
+            </span>
           </Button>
-        )}
-
-        {!installPWA && (
-          <div className="p-4 rounded-lg text-center">
-            <p className="text-gray-600 text-sm">Installed on your device</p>
-          </div>
-        )}
+        }
       </Block>
     </div>
   );
