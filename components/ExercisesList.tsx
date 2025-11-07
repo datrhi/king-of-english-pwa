@@ -106,7 +106,7 @@ export default function ExercisesList({ lessonId }: ExercisesListProps) {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="w-full flex items-center justify-center py-20">
+      <div className="flex items-center justify-center h-screen">
         <Preloader />
       </div>
     );

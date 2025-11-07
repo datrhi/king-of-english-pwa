@@ -190,7 +190,7 @@ function Game() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      <div className="flex items-center justify-center h-screen">
         <Preloader className="mb-4" />
       </div>
     );
@@ -199,7 +199,7 @@ function Game() {
   // No questions state
   if (!words || questions.length === 0) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      <div className="flex items-center justify-center h-screen">
         <Card className="p-6 text-center backdrop-blur-xl bg-white/30 border border-white/40 shadow-xl">
           <p className="text-lg mb-4 text-gray-700 font-medium">
             No questions available
@@ -212,7 +212,7 @@ function Game() {
 
   return (
     <div
-      className="flex flex-col overflow-hidden relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50"
+      className="flex flex-col overflow-hidden relative"
       style={{
         height: viewportHeight > 0 ? `${viewportHeight}px` : "100vh",
       }}
@@ -248,7 +248,7 @@ export default function GamePage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center justify-center h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        <div className="flex items-center justify-center h-screen">
           <Preloader />
         </div>
       }

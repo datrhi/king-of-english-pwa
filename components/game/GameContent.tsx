@@ -29,6 +29,7 @@ export const GameContent = forwardRef<GameContentRef, GameContentProps>(
     return (
       <div
         className={`relative z-10 flex-1 flex flex-col items-center justify-start p-4`}
+        style={{ height: "calc(100% - 59px)" }}
       >
         <Swiper
           spaceBetween={50}

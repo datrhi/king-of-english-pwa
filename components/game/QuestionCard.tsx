@@ -1,5 +1,6 @@
 import { RoomEvent, useEmitRoomEvent } from "@/hooks/useRoomEventSync";
 import { useVisualViewport } from "@/hooks/useVisualViewport";
+import { useDialog } from "@/providers/DialogProvider";
 import {
   currentAnswerAtom,
   currentQuestionIndexAtom,
@@ -10,39 +11,37 @@ import {
 import { Question } from "@/types/game";
 import { motion } from "framer-motion";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { Check } from "lucide-react";
+import { Check, Lightbulb } from "lucide-react";
 import Image from "next/image";
 
 interface QuestionCardProps {
   scrambled: string;
   image: string;
   description: string;
-  wordCount: number;
   answer: string;
   onAnswerChange: (value: string) => void;
   onSubmit: () => void;
   isCorrect: boolean;
   autoFocus?: boolean;
   isKeyboardOpen?: boolean;
+  onShowHint: () => void;
 }
 
 export function QuestionCard({
   scrambled,
   image,
   description,
-  wordCount,
   answer,
   onAnswerChange,
   onSubmit,
   isCorrect,
   autoFocus = false,
   isKeyboardOpen = false,
+  onShowHint,
 }: QuestionCardProps) {
-  const wordCountText = wordCount === 1 ? "1 word" : `${wordCount} words`;
-
   return (
     <div
-      className={`flex flex-col items-center justify-start h-full pt-2 ${
+      className={`flex flex-1 flex-col items-center justify-start pt-2 ${
         isKeyboardOpen ? "space-y-1 sm:space-y-2" : "space-y-3 sm:space-y-5"
       }`}
     >
@@ -52,15 +51,26 @@ export function QuestionCard({
           isKeyboardOpen ? "py-2" : "py-3 sm:py-4"
         }`}
       >
-        <h2
-          className={`font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent text-center break-words transition-all duration-300 ${
-            isKeyboardOpen
-              ? "text-xl sm:text-2xl"
-              : "text-2xl sm:text-3xl md:text-4xl"
-          }`}
-        >
-          {scrambled}
-        </h2>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex-1">
+            <h2
+              className={`font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent text-center break-words transition-all duration-300 ${
+                isKeyboardOpen
+                  ? "text-xl sm:text-2xl"
+                  : "text-2xl sm:text-3xl md:text-4xl"
+              }`}
+            >
+              {scrambled}
+            </h2>
+          </div>
+          <button
+            onClick={onShowHint}
+            className="flex-shrink-0 p-2 rounded-full bg-yellow-400/80 hover:bg-yellow-500/80 transition-colors shadow-md"
+            aria-label="Show hint"
+          >
+            <Lightbulb className={isKeyboardOpen ? "w-5 h-5" : "w-6 h-6"} />
+          </button>
+        </div>
       </div>
 
       {/* Input and Button */}
@@ -145,32 +155,6 @@ export function QuestionCard({
           )}
         </div>
       </div>
-
-      {/* Description hint */}
-      <div className="w-full max-w-md px-2 space-y-3">
-        {description && (
-          <div
-            className={`backdrop-blur-xl bg-white/30 rounded-2xl border border-white/40 shadow-lg transition-all duration-300 ${
-              isKeyboardOpen ? "p-2" : "p-4"
-            }`}
-          >
-            <p
-              className={`text-gray-700 text-center font-medium transition-all duration-300 ${
-                isKeyboardOpen ? "text-xs" : "text-sm"
-              }`}
-            >
-              💡 Hint: {description}
-            </p>
-            <p
-              className={`text-gray-700 text-center font-bold transition-all duration-300 ${
-                isKeyboardOpen ? "text-xs" : "text-sm"
-              }`}
-            >
-              {wordCountText}
-            </p>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
@@ -193,6 +177,18 @@ export function GameQuestionCard({
   const handleWrongAnswer = useSetAtom(handleWrongAnswerAtom);
   const { notifyAll } = useEmitRoomEvent();
   const { isKeyboardOpen } = useVisualViewport();
+  const { showAlert } = useDialog();
+
+  const handleShowHint = () => {
+    showAlert({
+      title: "Hint",
+      content: `${question.description}\n ${
+        getWordCount(question.answer) > 1
+          ? `[${getWordCount(question.answer)} words]`
+          : `[${getWordCount(question.answer)} word]`
+      }`,
+    });
+  };
 
   const getWordCount = (text: string): number => {
     const trimmed = text.trim();
@@ -223,10 +219,10 @@ export function GameQuestionCard({
   };
   return (
     <QuestionCard
+      onShowHint={handleShowHint}
       scrambled={question.scrambled}
       image={question.image}
       description={question.description}
-      wordCount={getWordCount(question.answer)}
       answer={currentAnswer}
       onAnswerChange={handleAnswerChange}
       onSubmit={handleTryAnswer}

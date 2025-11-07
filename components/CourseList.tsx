@@ -3,7 +3,16 @@
 import { useCourses } from "@/hooks/useCourses";
 import { useTransitionRouter } from "@/lib/next-view-transitions";
 import type { Course } from "@/services/coursesApi";
-import { Block, Button, Link, Preloader, Searchbar, Sheet, Toolbar, ToolbarPane } from "konsta/react";
+import {
+  Block,
+  Button,
+  Link,
+  Preloader,
+  Searchbar,
+  Sheet,
+  Toolbar,
+  ToolbarPane,
+} from "konsta/react";
 import { ChevronRight, X } from "lucide-react";
 import { useState } from "react";
 
@@ -14,7 +23,7 @@ export default function CourseList() {
   const router = useTransitionRouter();
 
   // Fetch courses from API
-  const { data: courses, isLoading, error } = useCourses({ sortBy: 'name' });
+  const { data: courses, isLoading, error } = useCourses({ sortBy: "name" });
 
   const handleCourseClick = (course: Course) => {
     setSelectedCourse(course);
@@ -41,16 +50,17 @@ export default function CourseList() {
 
   // Filter courses based on search query
   const filteredCourses = searchQuery
-    ? courses?.filter((course) =>
-      course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.description?.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    ? courses?.filter(
+        (course) =>
+          course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          course.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
     : courses;
 
   // Show loading state
   if (isLoading) {
     return (
-      <div className="w-full flex items-center justify-center py-20">
+      <div className="flex items-center justify-center h-screen">
         <Preloader />
       </div>
     );
@@ -112,7 +122,9 @@ export default function CourseList() {
             <div
               key={course.id}
               onClick={() => handleCourseClick(course)}
-              className={`${getBgClass(index)} w-full min-h-20 rounded-2xl flex flex-row items-center px-4 gap-4 hover:bg-blue-light-1 cursor-pointer active:scale-[0.98] transition-transform duration-150`}
+              className={`${getBgClass(
+                index
+              )} w-full min-h-20 rounded-2xl flex flex-row items-center px-4 gap-4 hover:bg-blue-light-1 cursor-pointer active:scale-[0.98] transition-transform duration-150`}
             >
               <div className="flex-1 py-4">
                 <h2 className="font-text-medium text-title text-base font-semibold">
@@ -142,9 +154,7 @@ export default function CourseList() {
           </ToolbarPane>
         </Toolbar>
         <Block className="ios:mt-4">
-          <h2 className="text-2xl font-bold mb-4">
-            {selectedCourse?.name}
-          </h2>
+          <h2 className="text-2xl font-bold mb-4">{selectedCourse?.name}</h2>
           {selectedCourse?.description && (
             <p className="text-gray-700 leading-relaxed mb-6">
               {selectedCourse.description}

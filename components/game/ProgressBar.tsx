@@ -122,9 +122,7 @@ export const GameProgressBar = forwardRef<
     !showLeaderboard &&
     !showWordDetails && (
       <div
-        className={`w-full flex justify-center items-center transition-all duration-300 ${
-          isKeyboardOpen ? "mt-1 sm:mt-2" : "mt-3 sm:mt-5"
-        }`}
+        className={`w-full flex justify-center items-center transition-all duration-300`}
       >
         <ProgressBar progress={progress} isKeyboardOpen={isKeyboardOpen} />
       </div>

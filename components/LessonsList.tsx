@@ -4,7 +4,16 @@ import { useLessons } from "@/hooks/useLessons";
 import { useTransitionRouter } from "@/lib/next-view-transitions";
 import type { Lesson } from "@/services/lessonsApi";
 import { shimmer, toBase64 } from "@/utils/shimmer";
-import { Block, Button, Link, Preloader, Searchbar, Sheet, Toolbar, ToolbarPane } from "konsta/react";
+import {
+  Block,
+  Button,
+  Link,
+  Preloader,
+  Searchbar,
+  Sheet,
+  Toolbar,
+  ToolbarPane,
+} from "konsta/react";
 import { ChevronRight, X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
@@ -20,7 +29,11 @@ export default function LessonsList({ courseId }: LessonsListProps) {
   const router = useTransitionRouter();
 
   // Fetch lessons from API
-  const { data: lessons, isLoading, error } = useLessons(courseId, { sortBy: 'name' });
+  const {
+    data: lessons,
+    isLoading,
+    error,
+  } = useLessons(courseId, { sortBy: "name" });
 
   const handleLessonClick = (lesson: Lesson) => {
     setSelectedLesson(lesson);
@@ -47,16 +60,17 @@ export default function LessonsList({ courseId }: LessonsListProps) {
 
   // Filter lessons based on search query
   const filteredLessons = searchQuery
-    ? lessons?.filter((lesson) =>
-      lesson.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      lesson.description?.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    ? lessons?.filter(
+        (lesson) =>
+          lesson.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          lesson.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
     : lessons;
 
   // Show loading state
   if (isLoading) {
     return (
-      <div className="w-full flex items-center justify-center py-20">
+      <div className="flex items-center justify-center h-screen">
         <Preloader />
       </div>
     );
@@ -118,7 +132,9 @@ export default function LessonsList({ courseId }: LessonsListProps) {
             <div
               key={lesson.id}
               onClick={() => handleLessonClick(lesson)}
-              className={`${getBgClass(index)} w-full min-h-20 rounded-2xl flex flex-row items-center px-4 gap-4 hover:bg-blue-light-1 cursor-pointer active:scale-[0.98] transition-transform duration-150`}
+              className={`${getBgClass(
+                index
+              )} w-full min-h-20 rounded-2xl flex flex-row items-center px-4 gap-4 hover:bg-blue-light-1 cursor-pointer active:scale-[0.98] transition-transform duration-150`}
             >
               {lesson.image && (
                 <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden relative">
@@ -128,7 +144,9 @@ export default function LessonsList({ courseId }: LessonsListProps) {
                     fill
                     className="object-cover"
                     placeholder="blur"
-                    blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(64, 64))}`}
+                    blurDataURL={`data:image/svg+xml;base64,${toBase64(
+                      shimmer(64, 64)
+                    )}`}
                   />
                 </div>
               )}
@@ -173,13 +191,13 @@ export default function LessonsList({ courseId }: LessonsListProps) {
                 fill
                 className="object-cover"
                 placeholder="blur"
-                blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(700, 475))}`}
+                blurDataURL={`data:image/svg+xml;base64,${toBase64(
+                  shimmer(700, 475)
+                )}`}
               />
             </div>
           )}
-          <h2 className="text-2xl font-bold mb-4">
-            {selectedLesson?.name}
-          </h2>
+          <h2 className="text-2xl font-bold mb-4">{selectedLesson?.name}</h2>
           {selectedLesson?.description && (
             <p className="text-gray-700 leading-relaxed mb-6">
               {selectedLesson.description}
@@ -200,4 +218,3 @@ export default function LessonsList({ courseId }: LessonsListProps) {
     </div>
   );
 }
-

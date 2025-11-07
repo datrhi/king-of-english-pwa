@@ -245,7 +245,13 @@ function LobbyContent() {
 
 export default function LobbyPage() {
   return (
-    <Suspense fallback={<Preloader />}>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-screen">
+          <Preloader />
+        </div>
+      }
+    >
       <LobbyContent />
     </Suspense>
   );

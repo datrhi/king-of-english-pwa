@@ -98,17 +98,9 @@ export default function TabbarPage() {
   return (
     <Suspense
       fallback={
-        <ScreenWithBackground
-          headerProps={{
-            title: "Course",
-          }}
-          view="scrollable"
-          contentPosition="center"
-        >
-          <div className="w-full flex items-center justify-center py-20">
-            <Preloader />
-          </div>
-        </ScreenWithBackground>
+        <div className="flex items-center justify-center h-screen">
+          <Preloader />
+        </div>
       }
     >
       <TabbarPageContent />

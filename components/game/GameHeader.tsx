@@ -3,7 +3,7 @@ import { currentQuestionIndexAtom, scoreAtom } from "@/stores/gameStore";
 import { Question } from "@/types/game";
 import { useAtomValue } from "jotai";
 import { Button } from "konsta/react";
-import { Pause, Play, Settings } from "lucide-react";
+import { DoorOpen } from "lucide-react";
 import { useState } from "react";
 
 interface GameHeaderProps {
@@ -65,7 +65,7 @@ export function GameHeader({
         >
           {currentQuestion}/{totalQuestions}
         </span>
-        <Button
+        {/* <Button
           onClick={onPause}
           rounded
           clear
@@ -78,7 +78,7 @@ export function GameHeader({
           ) : (
             <Pause size={isKeyboardOpen ? 16 : 20} />
           )}
-        </Button>
+        </Button> */}
         <Button
           onClick={onSettings}
           rounded
@@ -87,7 +87,7 @@ export function GameHeader({
           inline
           small
         >
-          <Settings size={isKeyboardOpen ? 16 : 20} />
+          <DoorOpen size={isKeyboardOpen ? 16 : 20} />
         </Button>
       </div>
     </div>
