@@ -16,6 +16,7 @@ import {
   useRoomEventSync,
 } from "@/hooks/useRoomEventSync";
 import { useRoomUsers } from "@/hooks/useRoomUsers";
+import { useVisualViewport } from "@/hooks/useVisualViewport";
 import { useRandomWords } from "@/hooks/useWords";
 import { useTransitionRouter } from "@/lib/next-view-transitions";
 import { useDialog } from "@/providers/DialogProvider";
@@ -56,6 +57,7 @@ function Game() {
   const searchParams = useSearchParams();
   const { showAlert } = useDialog();
   const gameContentRef = useRef<GameContentRef>(null);
+  const { height: viewportHeight } = useVisualViewport();
 
   // Get params from URL
   const pin = searchParams.get("pin") || "000000";
@@ -209,7 +211,12 @@ function Game() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div
+      className="flex flex-col overflow-hidden relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50"
+      style={{
+        height: viewportHeight > 0 ? `${viewportHeight}px` : "100vh",
+      }}
+    >
       {/* Animated color overlay for correct/wrong feedback */}
       <ColorOverlay />
       {/* Backdrop overlay for leaderboard/word details */}

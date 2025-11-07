@@ -1,5 +1,6 @@
 import { useGameTimer } from "@/hooks/useGameTimer";
 import { RoomEvent, useEmitRoomEvent } from "@/hooks/useRoomEventSync";
+import { useVisualViewport } from "@/hooks/useVisualViewport";
 import {
   correctCountAtom,
   currentQuestionIndexAtom,
@@ -14,13 +15,29 @@ import { forwardRef, useEffect, useImperativeHandle } from "react";
 
 interface ProgressBarProps {
   progress: number; // 0-1000
+  isKeyboardOpen?: boolean;
 }
 
-export function ProgressBar({ progress }: ProgressBarProps) {
+export function ProgressBar({
+  progress,
+  isKeyboardOpen = false,
+}: ProgressBarProps) {
   return (
-    <div className="w-full max-w-md px-2">
-      <div className="backdrop-blur-xl bg-white/30 rounded-full p-2 border border-white/40 shadow-lg">
-        <div className="relative h-6 backdrop-blur-sm bg-white/40 rounded-full overflow-hidden">
+    <div
+      className={`w-full px-2 transition-all duration-300 ${
+        isKeyboardOpen ? "max-w-[250px]" : "max-w-md"
+      }`}
+    >
+      <div
+        className={`backdrop-blur-xl bg-white/30 rounded-full border border-white/40 shadow-lg transition-all duration-300 ${
+          isKeyboardOpen ? "p-1" : "p-2"
+        }`}
+      >
+        <div
+          className={`relative backdrop-blur-sm bg-white/40 rounded-full overflow-hidden transition-all duration-300 ${
+            isKeyboardOpen ? "h-4" : "h-6"
+          }`}
+        >
           <motion.div
             className="absolute inset-0 bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 rounded-full"
             animate={{
@@ -38,7 +55,11 @@ export function ProgressBar({ progress }: ProgressBarProps) {
             }}
           />
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="relative z-10 text-xs font-bold text-white drop-shadow-md">
+            <span
+              className={`relative z-10 font-bold text-white drop-shadow-md transition-all duration-300 ${
+                isKeyboardOpen ? "text-[10px]" : "text-xs"
+              }`}
+            >
               {Math.round(progress)} pts
             </span>
           </div>
@@ -66,6 +87,7 @@ export const GameProgressBar = forwardRef<
   const correctCount = useAtomValue(correctCountAtom);
   const users = useAtomValue(usersAtom);
   const { emitEvent } = useEmitRoomEvent();
+  const { isKeyboardOpen } = useVisualViewport();
   const isCurrentQuestion = index === currentQuestionIndex;
 
   const handleTimeOut = () => {
@@ -99,8 +121,12 @@ export const GameProgressBar = forwardRef<
   return (
     !showLeaderboard &&
     !showWordDetails && (
-      <div className="mt-3 sm:mt-5 w-full flex justify-center items-center">
-        <ProgressBar progress={progress} />
+      <div
+        className={`w-full flex justify-center items-center transition-all duration-300 ${
+          isKeyboardOpen ? "mt-1 sm:mt-2" : "mt-3 sm:mt-5"
+        }`}
+      >
+        <ProgressBar progress={progress} isKeyboardOpen={isKeyboardOpen} />
       </div>
     )
   );

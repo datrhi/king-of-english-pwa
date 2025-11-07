@@ -1,4 +1,5 @@
 import { RoomEvent, useEmitRoomEvent } from "@/hooks/useRoomEventSync";
+import { useVisualViewport } from "@/hooks/useVisualViewport";
 import {
   currentAnswerAtom,
   currentQuestionIndexAtom,
@@ -22,6 +23,7 @@ interface QuestionCardProps {
   onSubmit: () => void;
   isCorrect: boolean;
   autoFocus?: boolean;
+  isKeyboardOpen?: boolean;
 }
 
 export function QuestionCard({
@@ -34,14 +36,29 @@ export function QuestionCard({
   onSubmit,
   isCorrect,
   autoFocus = false,
+  isKeyboardOpen = false,
 }: QuestionCardProps) {
   const wordCountText = wordCount === 1 ? "1 word" : `${wordCount} words`;
 
   return (
-    <div className="flex flex-col items-center justify-start h-full space-y-3 sm:space-y-5 pt-2">
+    <div
+      className={`flex flex-col items-center justify-start h-full pt-2 ${
+        isKeyboardOpen ? "space-y-1 sm:space-y-2" : "space-y-3 sm:space-y-5"
+      }`}
+    >
       {/* Title Card */}
-      <div className="backdrop-blur-xl bg-white/30 rounded-2xl px-4 sm:px-6 py-3 sm:py-4 border border-white/40 shadow-lg w-full max-w-md mx-2">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent text-center break-words">
+      <div
+        className={`backdrop-blur-xl bg-white/30 rounded-2xl px-4 sm:px-6 border border-white/40 shadow-lg w-full max-w-md mx-2 transition-all duration-300 ${
+          isKeyboardOpen ? "py-2" : "py-3 sm:py-4"
+        }`}
+      >
+        <h2
+          className={`font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent text-center break-words transition-all duration-300 ${
+            isKeyboardOpen
+              ? "text-xl sm:text-2xl"
+              : "text-2xl sm:text-3xl md:text-4xl"
+          }`}
+        >
           {scrambled}
         </h2>
       </div>
@@ -57,8 +74,12 @@ export function QuestionCard({
               onSubmit();
             }
           }}
-          placeholder="Type your answer..."
-          className="flex-1 px-3 sm:px-5 py-2.5 sm:py-3 rounded-full backdrop-blur-xl bg-white/60 text-gray-800 border-2 border-white/60 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 text-sm sm:text-base font-medium shadow-md placeholder:text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed min-w-0"
+          placeholder={isKeyboardOpen ? "Try something" : "Type your answer..."}
+          className={`flex-1 rounded-full backdrop-blur-xl bg-white/60 text-gray-800 border-2 border-white/60 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 font-medium shadow-md placeholder:text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed min-w-0 transition-all duration-300 ${
+            isKeyboardOpen
+              ? "px-3 py-2 text-sm"
+              : "px-3 sm:px-5 py-2.5 sm:py-3 text-sm sm:text-base"
+          }`}
           autoFocus={autoFocus}
           disabled={isCorrect}
         />
@@ -73,7 +94,11 @@ export function QuestionCard({
             duration: 0.3,
             ease: "easeOut",
           }}
-          className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-full font-bold text-base sm:text-lg text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[60px] sm:min-w-[80px] flex-shrink-0"
+          className={`rounded-full font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
+            isKeyboardOpen
+              ? "px-4 py-2 text-base min-w-[60px]"
+              : "px-4 sm:px-6 py-2.5 sm:py-3 text-base sm:text-lg min-w-[60px] sm:min-w-[80px]"
+          }`}
         >
           {isCorrect ? (
             <motion.div
@@ -81,7 +106,10 @@ export function QuestionCard({
               animate={{ scale: 1, rotate: 0 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
             >
-              <Check size={20} className="sm:w-6 sm:h-6" />
+              <Check
+                size={isKeyboardOpen ? 18 : 20}
+                className={isKeyboardOpen ? "" : "sm:w-6 sm:h-6"}
+              />
             </motion.div>
           ) : (
             "Try"
@@ -90,7 +118,11 @@ export function QuestionCard({
       </div>
 
       {/* Image */}
-      <div className="w-full max-w-md px-2">
+      <div
+        className={`w-full px-2 transition-all duration-300 ${
+          isKeyboardOpen ? "max-w-[200px] sm:max-w-[250px]" : "max-w-md"
+        }`}
+      >
         <div className="relative w-full aspect-square backdrop-blur-xl bg-white/40 rounded-3xl overflow-hidden shadow-2xl border-2 border-white/60">
           {image ? (
             <Image
@@ -102,7 +134,11 @@ export function QuestionCard({
             />
           ) : (
             <div className="flex items-center justify-center h-full">
-              <p className="text-gray-600 text-lg font-medium">
+              <p
+                className={`text-gray-600 font-medium ${
+                  isKeyboardOpen ? "text-sm" : "text-lg"
+                }`}
+              >
                 No image available
               </p>
             </div>
@@ -113,11 +149,23 @@ export function QuestionCard({
       {/* Description hint */}
       <div className="w-full max-w-md px-2 space-y-3">
         {description && (
-          <div className="backdrop-blur-xl bg-white/30 rounded-2xl p-4 border border-white/40 shadow-lg">
-            <p className="text-gray-700 text-sm text-center font-medium">
+          <div
+            className={`backdrop-blur-xl bg-white/30 rounded-2xl border border-white/40 shadow-lg transition-all duration-300 ${
+              isKeyboardOpen ? "p-2" : "p-4"
+            }`}
+          >
+            <p
+              className={`text-gray-700 text-center font-medium transition-all duration-300 ${
+                isKeyboardOpen ? "text-xs" : "text-sm"
+              }`}
+            >
               💡 Hint: {description}
             </p>
-            <p className="text-gray-700 text-sm text-center font-bold">
+            <p
+              className={`text-gray-700 text-center font-bold transition-all duration-300 ${
+                isKeyboardOpen ? "text-xs" : "text-sm"
+              }`}
+            >
               {wordCountText}
             </p>
           </div>
@@ -144,6 +192,7 @@ export function GameQuestionCard({
   const handleCorrectAnswer = useSetAtom(handleCorrectAnswerAtom);
   const handleWrongAnswer = useSetAtom(handleWrongAnswerAtom);
   const { notifyAll } = useEmitRoomEvent();
+  const { isKeyboardOpen } = useVisualViewport();
 
   const getWordCount = (text: string): number => {
     const trimmed = text.trim();
@@ -183,6 +232,7 @@ export function GameQuestionCard({
       onSubmit={handleTryAnswer}
       isCorrect={showCorrectAnimation}
       autoFocus={index === currentQuestionIndex}
+      isKeyboardOpen={isKeyboardOpen}
     />
   );
 }
