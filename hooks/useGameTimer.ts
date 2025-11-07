@@ -12,6 +12,8 @@ export interface UseGameTimerReturn {
   stopTimer: () => void;
 }
 
+const TIMEOUT_SECONDS_PER_QUESTION = 30;
+
 export function useGameTimer({
   shouldRun,
   onTimeOut,
@@ -45,7 +47,10 @@ export function useGameTimer({
 
       const interval = setInterval(() => {
         const elapsed = Date.now() - startTime;
-        const newProgress = Math.max(0, 1000 - elapsed / 10);
+        const newProgress = Math.max(
+          0,
+          1000 - elapsed / TIMEOUT_SECONDS_PER_QUESTION
+        );
         setQuestionProgress(newProgress);
         questionProgressRef.current = newProgress; // Update ref synchronously
 

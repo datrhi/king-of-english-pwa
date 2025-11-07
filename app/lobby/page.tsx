@@ -1,7 +1,11 @@
 "use client";
 import Lobby from "@/components/Lobby";
 import { useRoomConnection } from "@/hooks/useRoomConnection";
-import { useEmitRoomEvent, useRoomEventSync } from "@/hooks/useRoomEventSync";
+import {
+  RoomEvent,
+  useEmitRoomEvent,
+  useRoomEventSync,
+} from "@/hooks/useRoomEventSync";
 import { useTransitionRouter } from "@/lib/next-view-transitions";
 import { useDialog } from "@/providers/DialogProvider";
 import {
@@ -40,6 +44,7 @@ function LobbyContent() {
     exerciseId: "",
     image: "",
   });
+  const [isInitialized, setIsInitialized] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Manage WebSocket connection lifecycle (persist when navigating to game)
@@ -54,11 +59,10 @@ function LobbyContent() {
       console.log("[Lobby] Received room event:", eventData);
 
       switch (eventData.action) {
-        case "start_game": {
+        case RoomEvent.START_GAME: {
           // Navigate to game screen with necessary params
-          const rawPin = pin.replace(/\s/g, "");
           const params = new URLSearchParams({
-            pin: rawPin,
+            pin,
             exerciseId: roomData.exerciseId,
             exerciseName: roomData.exerciseName,
             isHost: isHost.toString(),
@@ -78,19 +82,19 @@ function LobbyContent() {
   // Setup room event synchronization
   useRoomEventSync({
     onEvent: handleRoomEvent,
+    dependencies: [isInitialized],
   });
 
   const { emitEvent } = useEmitRoomEvent();
 
   // Join room on mount
   useEffect(() => {
-    const rawPin = pin.replace(/\s/g, "");
-
     const initRoom = async () => {
       try {
-        const result = await joinRoom(rawPin, userName, userAvatar);
+        const result = await joinRoom(pin, userName, userAvatar);
 
         if (result.success && result.data) {
+          setIsInitialized(true);
           setUsers(result.data.users);
           setRoomData({
             exerciseName: result.data.room.exercise?.name || "Unknown Exercise",
@@ -163,7 +167,7 @@ function LobbyContent() {
     console.log("[Lobby] Host starting game...");
     // Host emits start_game event, then ALL users (including host) will receive it
     // and navigate to the game screen together
-    emitEvent("start_game");
+    emitEvent(RoomEvent.START_GAME);
   };
 
   const handleExitLobby = () => {
@@ -223,14 +227,9 @@ function LobbyContent() {
     ...user,
   }));
 
-  // Format pin with space
-  const formattedPin = pin
-    .replace(/\s/g, "")
-    .replace(/(\d{3})(\d{3})/, "$1 $2");
-
   return (
     <Lobby
-      pinCode={formattedPin}
+      pinCode={pin}
       users={usersWithHostInfo}
       exerciseName={roomData.exerciseName}
       image={roomData.image}

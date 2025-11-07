@@ -1,14 +1,16 @@
 import { useGameTimer } from "@/hooks/useGameTimer";
 import { RoomEvent, useEmitRoomEvent } from "@/hooks/useRoomEventSync";
 import {
+  correctCountAtom,
   currentQuestionIndexAtom,
   isGameOverAtom,
   showLeaderboardAtom,
   showWordDetailsAtom,
+  usersAtom,
 } from "@/stores/gameStore";
 import { motion } from "framer-motion";
 import { useAtomValue } from "jotai";
-import { forwardRef, useImperativeHandle } from "react";
+import { forwardRef, useEffect, useImperativeHandle } from "react";
 
 interface ProgressBarProps {
   progress: number; // 0-1000
@@ -61,6 +63,8 @@ export const GameProgressBar = forwardRef<
   const showWordDetails = useAtomValue(showWordDetailsAtom);
   const currentQuestionIndex = useAtomValue(currentQuestionIndexAtom);
   const isGameOver = useAtomValue(isGameOverAtom);
+  const correctCount = useAtomValue(correctCountAtom);
+  const users = useAtomValue(usersAtom);
   const { emitEvent } = useEmitRoomEvent();
   const isCurrentQuestion = index === currentQuestionIndex;
 
@@ -84,6 +88,13 @@ export const GameProgressBar = forwardRef<
       return questionProgressRef.current;
     },
   }));
+
+  useEffect(() => {
+    if (correctCount === users.length) {
+      stopTimer();
+      handleTimeOut();
+    }
+  }, [users, correctCount]);
 
   return (
     !showLeaderboard &&

@@ -1,7 +1,7 @@
 import { RoomUser } from "@/services/socketService";
 import { setThemeColor } from "@/utils/pwa";
 import { atom } from "jotai";
-import { atomWithReset } from "jotai/utils";
+import { atomWithReset, RESET } from "jotai/utils";
 
 // Core game state atoms
 export const currentQuestionIndexAtom = atomWithReset(0);
@@ -13,6 +13,7 @@ export const userIdAtom = atom<string>("");
 export const leaderboardPlayersAtom = atom<Array<RoomUser & { score: number }>>(
   []
 );
+export const correctCountAtom = atomWithReset(0);
 
 // Animation state atoms
 export const showPointsAnimationAtom = atom(false);
@@ -59,6 +60,30 @@ export const handleCorrectAnswerAtom = atom(
   }
 );
 
+export const handleInitUsers = atom(
+  null,
+  (get, set, users: RoomUser[]) => {
+    set(usersAtom, users);
+    set(leaderboardPlayersAtom, users.map((user) => ({ ...user, score: 0 })));
+  }
+);
+
+export const handleAddUser = atom(
+  null,
+  (get, set, user: RoomUser) => {
+    set(usersAtom, (prevUsers) => [...prevUsers, user]);
+    set(leaderboardPlayersAtom, (prevPlayers) => [...prevPlayers, { ...user, score: 0 }]);
+  }
+);
+
+export const handleRemoveUser = atom(
+  null,
+  (get, set, userId: string) => {
+    set(usersAtom, (prevUsers) => prevUsers.filter((user) => user.id !== userId));
+    set(leaderboardPlayersAtom, (prevPlayers) => prevPlayers.filter((player) => player.id !== userId));
+  }
+);
+
 export const handleWrongAnswerAtom = atom(null, (get, set) => {
   set(currentAnswerAtom, "");
   if (wrongAnswerTimeout) {
@@ -78,14 +103,11 @@ export const handleScoreUpdateAtom = atom(
   null,
   (get, set, userId: string, score: number) => {
     const leaderboardPlayers = get(leaderboardPlayersAtom);
-    const users = get(usersAtom);
-    let updatedLeaderboardPlayers: Array<RoomUser & { score: number }> =
-      leaderboardPlayers.length > 0
-        ? leaderboardPlayers
-        : users.map((user) => ({ ...user, score: 0 }));
+    let updatedLeaderboardPlayers: Array<RoomUser & { score: number }> = leaderboardPlayers;
     const userIndex = updatedLeaderboardPlayers.findIndex(
       (user) => user.id === userId
     );
+    set(correctCountAtom, prev => prev + 1)
     if (userIndex !== -1) {
       updatedLeaderboardPlayers[userIndex].score += score;
     }
@@ -115,6 +137,7 @@ export const handleTimeOutAtom = atom(null, (get, set) => {
 export const showLeaderboardActionAtom = atom(null, (get, set) => {
   set(showWordDetailsAtom, false);
   set(showCorrectAnimationAtom, false);
+  set(correctCountAtom, RESET);
   setThemeColor();
   set(showLeaderboardAtom, true);
 });

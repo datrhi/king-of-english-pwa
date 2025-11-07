@@ -29,13 +29,15 @@ function TabbarPageContent() {
   const source = searchParams.get("source");
   const [isInStandalone, setIsInStandalone] = useState(false);
 
-  useEffect(() => { setIsInStandalone(isInStandaloneMode() as boolean) }, [])
+  useEffect(() => {
+    setIsInStandalone(isInStandaloneMode() as boolean);
+  }, []);
 
   if (source === "pwa" || isInStandalone) {
     return (
       <ScreenWithBackground
         headerProps={{
-          title: Tabs[activeTab].header
+          title: Tabs[activeTab].header,
         }}
         view="scrollable"
         contentPosition={activeTab === "explore" ? "start" : "center"}
@@ -57,9 +59,7 @@ function TabbarPageContent() {
           </ToolbarPane>
         </Tabbar>
 
-        {activeTab === "explore" && (
-          <CourseList />
-        )}
+        {activeTab === "explore" && <CourseList />}
 
         {activeTab === "join" && <JoinGame />}
       </ScreenWithBackground>
@@ -70,7 +70,7 @@ function TabbarPageContent() {
     return (
       <ScreenWithBackground
         headerProps={{
-          title: "Installing..."
+          title: "Installing...",
         }}
         view="scrollable"
         contentPosition="center"
@@ -80,13 +80,11 @@ function TabbarPageContent() {
     );
   }
 
-
-
   // Handle install introduction screen
   return (
     <ScreenWithBackground
       headerProps={{
-        title: "Install App"
+        title: "Install App",
       }}
       view="scrollable"
       contentPosition="center"
@@ -98,7 +96,21 @@ function TabbarPageContent() {
 
 export default function TabbarPage() {
   return (
-    <Suspense fallback={<Preloader />}>
+    <Suspense
+      fallback={
+        <ScreenWithBackground
+          headerProps={{
+            title: "Course",
+          }}
+          view="scrollable"
+          contentPosition="center"
+        >
+          <div className="w-full flex items-center justify-center py-20">
+            <Preloader />
+          </div>
+        </ScreenWithBackground>
+      }
+    >
       <TabbarPageContent />
     </Suspense>
   );

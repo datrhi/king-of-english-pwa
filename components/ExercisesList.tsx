@@ -68,12 +68,9 @@ export default function ExercisesList({ lessonId }: ExercisesListProps) {
 
       console.log("Room created:", room);
 
-      // Format pin code with space (e.g., "123456" -> "123 456")
-      const formattedPin = room.pinCode.replace(/(\d{3})(\d{3})/, "$1 $2");
-
       // Navigate to lobby - the lobby page will handle joining via WebSocket
       const params = new URLSearchParams({
-        pin: formattedPin,
+        pin: room.pinCode,
         name: username,
         avatar: avatarUrl,
         isHost: "true",

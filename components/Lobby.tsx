@@ -11,7 +11,7 @@ import {
 } from "konsta/react";
 import { MoreVertical } from "lucide-react";
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import ScreenWithBackground from "./ScreenWithBackground";
 
 interface LobbyUser {
@@ -50,6 +50,10 @@ export default function Lobby({
   const [toastOpened, setToastOpened] = useState(false);
   const popoverTargetRef = useRef(null);
   const { showAlert, showConfirm } = useDialog();
+  const pin = useMemo(
+    () => pinCode.replace(/(\d{3})(\d{3})/, "$1 $2"),
+    [pinCode]
+  );
 
   const openPopover = () => {
     setPopoverOpened(true);
@@ -57,8 +61,7 @@ export default function Lobby({
 
   const copyPinCode = async () => {
     try {
-      const rawPin = pinCode.replace(/\s/g, "");
-      await navigator.clipboard.writeText(rawPin);
+      await navigator.clipboard.writeText(pinCode);
       setToastOpened(true);
       setTimeout(() => setToastOpened(false), 3000);
     } catch (err) {
@@ -143,7 +146,7 @@ export default function Lobby({
                 onClick={copyPinCode}
                 className="text-5xl font-bold text-primary tracking-widest cursor-pointer hover:scale-105 transition-transform"
               >
-                {pinCode}
+                {pin}
               </div>
             </div>
           </div>

@@ -24,8 +24,7 @@ export const useRoomConnection = (options: UseRoomConnectionOptions) => {
 
     // Handle page reload/close - always disconnect from socket
     const handleBeforeUnload = () => {
-      const rawPin = pin.replace(/\s/g, "");
-      leaveRoom(rawPin);
+      leaveRoom(pin);
       disconnectRoomSocket();
       sessionStorage.removeItem("inGameSession");
     };
@@ -39,8 +38,7 @@ export const useRoomConnection = (options: UseRoomConnectionOptions) => {
       // Only leave room if we're intentionally exiting
       // or if we're not persisting on navigation
       if (isExitingRef.current || !persistOnNavigation) {
-        const rawPin = pin.replace(/\s/g, "");
-        leaveRoom(rawPin);
+        leaveRoom(pin);
         disconnectRoomSocket();
         sessionStorage.removeItem("inGameSession");
       }

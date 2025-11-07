@@ -202,10 +202,8 @@ export function Leaderboard({
 
 export function GameLeaderboard({
   questionsLength,
-  onExit,
 }: {
   questionsLength: number;
-  onExit: () => void;
 }) {
   const show = useAtomValue(showLeaderboardAtom);
   const currentQuestionIndex = useAtomValue(currentQuestionIndexAtom);
@@ -214,10 +212,10 @@ export function GameLeaderboard({
   const { emitEvent } = useEmitRoomEvent();
 
   useEffect(() => {
-    if (currentQuestionIndex === questionsLength - 1) {
+    if (currentQuestionIndex === questionsLength - 1 && show) {
       setIsGameOver(true);
     }
-  }, [currentQuestionIndex, questionsLength, setIsGameOver]);
+  }, [currentQuestionIndex, questionsLength, setIsGameOver, show]);
 
   const handleLeaderboardComplete = () => {
     emitEvent(RoomEvent.NEXT_QUESTION);

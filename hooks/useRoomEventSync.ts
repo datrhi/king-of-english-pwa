@@ -17,6 +17,7 @@ export interface RoomEventData {
 
 export interface UseRoomEventSyncProps {
   onEvent: (eventData: RoomEventData) => void;
+  dependencies?: any[];
 }
 
 export enum RoomEvent {
@@ -26,6 +27,7 @@ export enum RoomEvent {
   SHOW_WORD_DETAILS = "show_word_details",
   SHOW_LEADERBOARD = "show_leaderboard",
   NEXT_QUESTION = "next_question",
+  START_GAME = "start_game",
 }
 
 /**
@@ -34,7 +36,10 @@ export enum RoomEvent {
  * - All users (including host) will receive events through `onEvent` callback
  * This ensures everyone stays in sync regardless of role
  */
-export function useRoomEventSync({ onEvent }: UseRoomEventSyncProps) {
+export function useRoomEventSync({
+  onEvent,
+  dependencies = [],
+}: UseRoomEventSyncProps) {
   const onEventRef = useRef(onEvent);
 
   // Update ref when callback changes
@@ -51,7 +56,7 @@ export function useRoomEventSync({ onEvent }: UseRoomEventSyncProps) {
     return () => {
       offRoomEvent();
     };
-  }, []);
+  }, dependencies);
 }
 
 export function useEmitRoomEvent() {
@@ -66,14 +71,14 @@ export function useEmitRoomEvent() {
         );
         return;
       }
-      emitRoomEvent(pin.replace(/\s/g, ""), action, data);
+      emitRoomEvent(pin, action, data);
     },
     [pin, isHost]
   );
 
   const notifyAll = useCallback(
     (action: string, data?: unknown) => {
-      emitRoomEvent(pin.replace(/\s/g, ""), action, data);
+      emitRoomEvent(pin, action, data);
     },
     [pin]
   );

@@ -229,7 +229,7 @@ function Game() {
       <GameContent ref={gameContentRef} questions={questions} />
 
       {/* Leaderboard */}
-      <GameLeaderboard onExit={onExit} questionsLength={questions.length} />
+      <GameLeaderboard questionsLength={questions.length} />
 
       {/* Word Details */}
       <GameWordDetails questions={questions} />
