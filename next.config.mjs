@@ -46,6 +46,19 @@ const nextConfig = {
   experimental: {
     reactCompiler: true,
   },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-transform",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default withSerwist(nextConfig);
