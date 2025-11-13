@@ -24,19 +24,16 @@ export function ProgressBar({
 }: ProgressBarProps) {
   return (
     <div
-      className={`w-full px-2 transition-all duration-300 ${
-        isKeyboardOpen ? "max-w-[250px]" : "max-w-md"
-      }`}
+      className={`w-full px-2 transition-all duration-300 ${isKeyboardOpen ? "max-w-[250px]" : "max-w-md"
+        }`}
     >
       <div
-        className={`backdrop-blur-xl bg-white/30 rounded-full border border-white/40 shadow-lg transition-all duration-300 ${
-          isKeyboardOpen ? "p-1" : "p-2"
-        }`}
+        className={`backdrop-blur-xl bg-white/30 rounded-full border border-white/40 shadow-lg transition-all duration-300 ${isKeyboardOpen ? "p-1" : "p-2"
+          }`}
       >
         <div
-          className={`relative backdrop-blur-sm bg-white/40 rounded-full overflow-hidden transition-all duration-300 ${
-            isKeyboardOpen ? "h-4" : "h-6"
-          }`}
+          className={`relative backdrop-blur-sm bg-white/40 rounded-full overflow-hidden transition-all duration-300 ${isKeyboardOpen ? "h-4" : "h-6"
+            }`}
         >
           <motion.div
             className="absolute inset-0 bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 rounded-full"
@@ -46,8 +43,8 @@ export function ProgressBar({
                 progress > 500
                   ? "#22c55e"
                   : progress > 250
-                  ? "#f59e0b"
-                  : "#ef4444",
+                    ? "#f59e0b"
+                    : "#ef4444",
             }}
             transition={{
               duration: 0.1,
@@ -56,9 +53,8 @@ export function ProgressBar({
           />
           <div className="absolute inset-0 flex items-center justify-center">
             <span
-              className={`relative z-10 font-bold text-white drop-shadow-md transition-all duration-300 ${
-                isKeyboardOpen ? "text-[10px]" : "text-xs"
-              }`}
+              className={`relative z-10 font-bold text-white drop-shadow-md transition-all duration-300 ${isKeyboardOpen ? "text-[10px]" : "text-xs"
+                }`}
             >
               {Math.round(progress)} pts
             </span>
@@ -112,11 +108,11 @@ export const GameProgressBar = forwardRef<
   }));
 
   useEffect(() => {
-    if (correctCount === users.length) {
+    if (correctCount === users.length && isCurrentQuestion) {
       stopTimer();
       handleTimeOut();
     }
-  }, [users, correctCount]);
+  }, [users, correctCount, isCurrentQuestion]);
 
   return (
     !showLeaderboard &&

@@ -1,6 +1,8 @@
 "use client";
 
+import { shimmer, toBase64 } from "@/utils/shimmer";
 import { Dialog, DialogButton } from "konsta/react";
+import Image from "next/image";
 import { createContext, ReactNode, useContext, useState } from "react";
 
 interface DialogConfig {
@@ -27,11 +29,20 @@ interface InputDialogConfig {
   maxLength?: number;
 }
 
+interface HintDialogConfig {
+  title?: string;
+  content: string;
+  image?: string;
+  confirmText?: string;
+  disableBackdropClick?: boolean;
+}
+
 interface DialogContextType {
   showDialog: (config: DialogConfig) => void;
   showConfirm: (config: Omit<DialogConfig, "type">) => void;
   showAlert: (config: Omit<DialogConfig, "type">) => void;
   showInput: (config: InputDialogConfig) => void;
+  showHint: (config: HintDialogConfig) => void;
 }
 
 const DialogContext = createContext<DialogContextType | undefined>(undefined);
@@ -39,6 +50,7 @@ const DialogContext = createContext<DialogContextType | undefined>(undefined);
 export function DialogProvider({ children }: { children: ReactNode }) {
   const [dialogOpened, setDialogOpened] = useState(false);
   const [inputDialogOpened, setInputDialogOpened] = useState(false);
+  const [hintDialogOpened, setHintDialogOpened] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [dialogConfig, setDialogConfig] = useState<DialogConfig>({
     title: "",
@@ -54,6 +66,11 @@ export function DialogProvider({ children }: { children: ReactNode }) {
       disableBackdropClick: false,
     }
   );
+  const [hintDialogConfig, setHintDialogConfig] = useState<HintDialogConfig>({
+    title: "",
+    content: "",
+    disableBackdropClick: false,
+  });
 
   const showDialog = (config: DialogConfig) => {
     setDialogConfig(config);
@@ -78,6 +95,11 @@ export function DialogProvider({ children }: { children: ReactNode }) {
     setInputDialogConfig(config);
     setInputValue(config.defaultValue || "");
     setInputDialogOpened(true);
+  };
+
+  const showHint = (config: HintDialogConfig) => {
+    setHintDialogConfig(config);
+    setHintDialogOpened(true);
   };
 
   const handleConfirm = () => {
@@ -110,6 +132,10 @@ export function DialogProvider({ children }: { children: ReactNode }) {
     setInputValue("");
   };
 
+  const handleHintClose = () => {
+    setHintDialogOpened(false);
+  };
+
   const renderButtons = () => {
     switch (dialogConfig.type) {
       case "confirm":
@@ -135,7 +161,7 @@ export function DialogProvider({ children }: { children: ReactNode }) {
 
   return (
     <DialogContext.Provider
-      value={{ showDialog, showConfirm, showAlert, showInput }}
+      value={{ showDialog, showConfirm, showAlert, showInput, showHint }}
     >
       {children}
       <Dialog
@@ -194,6 +220,40 @@ export function DialogProvider({ children }: { children: ReactNode }) {
               {inputDialogConfig.confirmText || "OK"}
             </DialogButton>
           </>
+        }
+      />
+      <Dialog
+        opened={hintDialogOpened}
+        onBackdropClick={() => {
+          if (hintDialogConfig.disableBackdropClick) {
+            return;
+          }
+          handleHintClose();
+        }}
+        title={hintDialogConfig.title}
+        content={
+          <div className="space-y-3">
+            <div className="whitespace-pre-line">{hintDialogConfig.content}</div>
+            {hintDialogConfig.image && (
+              <div className="relative w-full h-40" key={hintDialogConfig.title}>
+                <Image
+                  src={hintDialogConfig.image}
+                  alt="Hint"
+                  fill
+                  placeholder="blur"
+                  blurDataURL={`data:image/svg+xml;base64,${toBase64(
+                    shimmer(64, 64)
+                  )}`}
+                  className="object-contain"
+                />
+              </div>
+            )}
+          </div>
+        }
+        buttons={
+          <DialogButton strong onClick={handleHintClose}>
+            {hintDialogConfig.confirmText || "OK"}
+          </DialogButton>
         }
       />
     </DialogContext.Provider>

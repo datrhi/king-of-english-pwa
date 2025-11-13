@@ -79,11 +79,10 @@ const LeaderboardList = function LeaderboardList({
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.4 + index * 0.1 }}
-          className={`flex items-center gap-4 p-4 rounded-2xl backdrop-blur-xl shadow-lg ${
-            player.isMe
+          className={`flex items-center gap-4 p-4 rounded-2xl backdrop-blur-xl shadow-lg ${player.isMe
               ? "bg-gradient-to-r from-indigo-100/60 to-purple-100/60 border-2 border-indigo-400/60"
               : "bg-white/30 border border-white/40"
-          }`}
+            }`}
         >
           {/* Rank Badge */}
           <div className="flex-shrink-0">
@@ -115,20 +114,17 @@ const LeaderboardList = function LeaderboardList({
           {/* Player Info */}
           <div className="flex-1">
             <p
-              className={`font-bold text-base ${
-                player.isMe ? "text-indigo-700" : "text-gray-800"
-              }`}
+              className={`font-bold text-base ${player.isMe ? "text-indigo-700" : "text-gray-800"
+                }`}
             >
               {player.name}
-              {player.isMe && " 👤"}
             </p>
           </div>
 
           {/* Score */}
           <div
-            className={`text-right font-bold text-xl ${
-              player.isMe ? "text-indigo-700" : "text-gray-700"
-            }`}
+            className={`text-right font-bold text-xl ${player.isMe ? "text-indigo-700" : "text-gray-700"
+              }`}
           >
             {player.score}
             <span className="text-sm ml-1 font-medium">pts</span>
