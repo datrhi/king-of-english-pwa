@@ -6,5 +6,6 @@ export { GameLeaderboard } from "./Leaderboard";
 export { GamePointsAnimation } from "./PointsAnimation";
 export { GameProgressBar, type GameProgressBarRef } from "./ProgressBar";
 export { GameQuestionCard } from "./QuestionCard";
+export { ScrambleInput } from "./ScrambleInput";
 export { TextDisplay } from "./TextDisplay";
 export { GameWordDetails } from "./WordDetails";

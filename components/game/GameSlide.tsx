@@ -18,16 +18,14 @@ export const GameSlide = ({ question, index }: Props) => {
     return progressBarRef.current.getCurrentProgress();
   };
   return (
-    <div className="flex flex-col items-center justify-start h-full">
+    <div className="flex flex-col items-center justify-start h-full overflow-y-auto">
+      <GameProgressBar ref={progressBarRef} index={index} />
       <GameQuestionCard
         question={question}
         stopTimer={handleStopTimer}
         getCurrentProgress={handleGetCurrentProgress}
         index={index}
       />
-
-      {/* Progress Bar */}
-      <GameProgressBar ref={progressBarRef} index={index} />
     </div>
   );
 };

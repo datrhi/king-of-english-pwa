@@ -1,6 +1,5 @@
 import { RoomEvent, useEmitRoomEvent } from "@/hooks/useRoomEventSync";
 import { useVisualViewport } from "@/hooks/useVisualViewport";
-import { useDialog } from "@/providers/DialogProvider";
 import {
   currentAnswerAtom,
   currentQuestionIndexAtom,
@@ -9,10 +8,10 @@ import {
   showCorrectAnimationAtom,
 } from "@/stores/gameStore";
 import { Question } from "@/types/game";
-import { motion } from "framer-motion";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { Check, Lightbulb } from "lucide-react";
-import { TextDisplay } from "./TextDisplay";
+import Image from "next/image";
+import { useEffect } from "react";
+import { ScrambleInput } from "./ScrambleInput";
 
 interface QuestionCardProps {
   scrambled: string;
@@ -24,9 +23,10 @@ interface QuestionCardProps {
   isCorrect: boolean;
   autoFocus?: boolean;
   isKeyboardOpen?: boolean;
-  onShowHint: () => void;
+  // onShowHint: () => void;
   questionAnswer: string;
   shouldRun?: boolean;
+  wordCountText: number;
 }
 
 export function QuestionCard({
@@ -39,95 +39,76 @@ export function QuestionCard({
   isCorrect,
   autoFocus = false,
   isKeyboardOpen = false,
-  onShowHint,
+  // onShowHint,
   questionAnswer,
   shouldRun = false,
+  wordCountText,
 }: QuestionCardProps) {
   return (
     <div
       className={`flex flex-1 flex-col items-center justify-start pt-2 ${isKeyboardOpen ? "space-y-1 sm:space-y-2" : "space-y-3 sm:space-y-5"
         }`}
     >
-      {/* Title Card */}
+      {/* Scramble Input Component */}
+      <ScrambleInput
+        scrambled={scrambled}
+        answer={answer}
+        onAnswerChange={onAnswerChange}
+        onSubmit={onSubmit}
+        isCorrect={isCorrect}
+        isKeyboardOpen={isKeyboardOpen}
+      />
+      {/* Image */}
       <div
-        className={`backdrop-blur-xl bg-white/30 rounded-2xl px-4 sm:px-6 border border-white/40 shadow-lg w-full max-w-md mx-2 transition-all duration-300 ${isKeyboardOpen ? "py-2" : "py-3 sm:py-4"
+        className={`w-full px-2 transition-all duration-300 ${isKeyboardOpen ? "max-w-[200px] sm:max-w-[250px]" : "max-w-md"
           }`}
       >
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex-1">
-            <h2
-              className={`font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent text-center break-words transition-all duration-300 ${isKeyboardOpen
-                ? "text-xl sm:text-2xl"
-                : "text-2xl sm:text-3xl md:text-4xl"
-                }`}
-            >
-              {scrambled}
-            </h2>
-          </div>
-          <button
-            onClick={onShowHint}
-            className="flex-shrink-0 p-2 rounded-full bg-yellow-400/80 hover:bg-yellow-500/80 transition-colors shadow-md"
-            aria-label="Show hint"
-          >
-            <Lightbulb className={isKeyboardOpen ? "w-5 h-5" : "w-6 h-6"} />
-          </button>
+        <div className="relative w-full aspect-square backdrop-blur-xl bg-white/40 rounded-3xl overflow-hidden shadow-2xl border-2 border-white/60">
+          {image ? (
+            <Image
+              src={image}
+              alt="Question"
+              fill
+              className="object-contain"
+              priority
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <p
+                className={`text-gray-600 font-medium ${isKeyboardOpen ? "text-sm" : "text-lg"
+                  }`}
+              >
+                No image available
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Input and Button */}
-      <div className="flex gap-2 sm:gap-3 w-full max-w-md px-2 items-center">
-        <input
-          type="text"
-          value={answer}
-          onChange={(e) => onAnswerChange(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && answer.trim() && !isCorrect) {
-              onSubmit();
-            }
-          }}
-          placeholder={isKeyboardOpen ? "Try something" : "Type your answer..."}
-          className={`flex-1 rounded-full backdrop-blur-xl bg-white/60 text-gray-800 border-2 border-white/60 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 font-medium shadow-md placeholder:text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed min-w-0 transition-all duration-300 ${isKeyboardOpen
-            ? "px-3 py-2 text-sm"
-            : "px-3 sm:px-5 py-2.5 sm:py-3 text-sm sm:text-base"
-            }`}
-          autoFocus={autoFocus}
-          disabled={isCorrect}
-        />
-        <motion.button
-          onClick={onSubmit}
-          disabled={!answer.trim() || isCorrect}
-          animate={{
-            backgroundColor: isCorrect ? "#22c55e" : "#007aff",
-            scale: isCorrect ? 1.1 : 1,
-          }}
-          transition={{
-            duration: 0.3,
-            ease: "easeOut",
-          }}
-          className={`rounded-full font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isKeyboardOpen
-            ? "px-4 py-2 text-base min-w-[60px]"
-            : "px-4 sm:px-6 py-2.5 sm:py-3 text-base sm:text-lg min-w-[60px] sm:min-w-[80px]"
-            }`}
-        >
-          {isCorrect ? (
-            <motion.div
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
+      {/* Description hint */}
+      <div className="w-full max-w-md px-2 space-y-3">
+        {description && (
+          <div
+            className={`backdrop-blur-xl bg-white/30 rounded-2xl border border-white/40 shadow-lg transition-all duration-300 ${isKeyboardOpen ? "p-2" : "p-4"
+              }`}
+          >
+            <p
+              className={`text-gray-700 text-center font-medium transition-all duration-300 ${isKeyboardOpen ? "text-xs" : "text-sm"
+                }`}
             >
-              <Check
-                size={isKeyboardOpen ? 18 : 20}
-                className={isKeyboardOpen ? "" : "sm:w-6 sm:h-6"}
-              />
-            </motion.div>
-          ) : (
-            "Try"
-          )}
-        </motion.button>
+              💡 Hint: {description}
+            </p>
+            <p
+              className={`text-gray-700 text-center font-bold transition-all duration-300 ${isKeyboardOpen ? "text-xs" : "text-sm"
+                }`}
+            >
+              {wordCountText > 1
+                ? `${wordCountText} words`
+                : `${wordCountText} word`}
+            </p>
+          </div>
+        )}
       </div>
-
-      {/* Scrambled Text Display */}
-      <TextDisplay shouldRun={shouldRun} text={questionAnswer} isKeyboardOpen={isKeyboardOpen} />
     </div>
   );
 }
@@ -150,18 +131,15 @@ export function GameQuestionCard({
   const handleWrongAnswer = useSetAtom(handleWrongAnswerAtom);
   const { notifyAll } = useEmitRoomEvent();
   const { isKeyboardOpen } = useVisualViewport();
-  const { showHint } = useDialog();
 
-  const handleShowHint = () => {
-    showHint({
-      title: "Hint",
-      content: `${question.description}\n ${getWordCount(question.answer) > 1
-        ? `[${getWordCount(question.answer)} words]`
-        : `[${getWordCount(question.answer)} word]`
-        }`,
-      image: question.image,
-    });
-  };
+  useEffect(() => {
+    if (
+      currentAnswer.length === question.answer.length &&
+      index === currentQuestionIndex
+    ) {
+      handleTryAnswer();
+    }
+  }, [currentAnswer, index, currentQuestionIndex]);
 
   const getWordCount = (text: string): number => {
     const trimmed = text.trim();
@@ -192,7 +170,7 @@ export function GameQuestionCard({
   };
   return (
     <QuestionCard
-      onShowHint={handleShowHint}
+      // onShowHint={handleShowHint}
       scrambled={question.scrambled}
       image={question.image}
       description={question.description}
@@ -204,6 +182,7 @@ export function GameQuestionCard({
       isKeyboardOpen={isKeyboardOpen}
       questionAnswer={question.answer}
       shouldRun={index === currentQuestionIndex}
+      wordCountText={getWordCount(question.answer)}
     />
   );
 }
