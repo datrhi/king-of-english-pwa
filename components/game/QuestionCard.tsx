@@ -154,7 +154,7 @@ export function GameQuestionCard({
   const handleTryAnswer = () => {
     const correctAnswer = question.answer;
 
-    if (currentAnswer === correctAnswer) {
+    if (currentAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim()) {
       const questionProgress = getCurrentProgress();
       const earnedPoints = Math.round(questionProgress);
       // for update the score in leaderboard

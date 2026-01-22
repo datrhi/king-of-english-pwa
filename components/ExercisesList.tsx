@@ -147,7 +147,7 @@ export default function ExercisesList({ lessonId }: ExercisesListProps) {
       </div>
 
       {/* FlatList-like container */}
-      <div className="flex flex-col gap-4 p-4 pb-20">
+      <div className="flex flex-col gap-4 p-4 pb-32">
         {filteredExercises && filteredExercises.length === 0 ? (
           <div className="w-full flex flex-col items-center justify-center py-20 px-4">
             <p className="text-gray-500 text-center">
