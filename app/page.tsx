@@ -3,6 +3,7 @@ import CourseList from "@/components/CourseList";
 import InstallIntroduction from "@/components/InstallIntroduction";
 import JoinGame from "@/components/JoinGame";
 import ScreenWithBackground from "@/components/ScreenWithBackground";
+import PWAInstallWrapper from "@/lib/pwa-install-handler/PWAInstall";
 import { isInStandaloneMode } from "@/utils/pwa";
 import { Preloader, Tabbar, TabbarLink, ToolbarPane } from "konsta/react";
 import { Compass, Users } from "lucide-react";
@@ -78,17 +79,11 @@ function TabbarPageContent() {
     );
   }
 
-  // Handle install introduction screen
   return (
-    <ScreenWithBackground
-      headerProps={{
-        title: "Install App",
-      }}
-      view="scrollable"
-      contentPosition="center"
-    >
+    <>
+      <PWAInstallWrapper />
       <InstallIntroduction />
-    </ScreenWithBackground>
+    </>
   );
 }
 
