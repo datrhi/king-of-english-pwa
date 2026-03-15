@@ -48,25 +48,34 @@
   ],
   "screenshots": [
     {
-      "src": "/images/home_screenshot.png",
-      "sizes": "591x1280",
-      "type": "image/jpg"
+      "src": "/screenshots/01-hero-1284x2778.png",
+      "sizes": "1284x2778",
+      "type": "image/png"
     },
     {
-      "src": "/images/join_screenshot.png",
-      "sizes": "591x1280",
-      "type": "image/jpg"
+      "src": "/screenshots/02-multiplayer-1284x2778.png",
+      "sizes": "1284x2778",
+      "type": "image/png"
     },
     {
-      "src": "/images/lobby_screenshot.png",
-      "sizes": "591x1280",
-      "type": "image/jpg"
+      "src": "/screenshots/03-quiz-1284x2778.png",
+      "sizes": "1284x2778",
+      "type": "image/png"
     },
     {
-      "src": "/images/desktop_screenshot.png",
-      "sizes": "1920x936",
-      "type": "image/png",
-      "form_factor": "wide"
+      "src": "/screenshots/04-word-details-1284x2778.png",
+      "sizes": "1284x2778",
+      "type": "image/png"
+    },
+    {
+      "src": "/screenshots/05-leaderboard-1284x2778.png",
+      "sizes": "1284x2778",
+      "type": "image/png"
+    },
+    {
+      "src": "/screenshots/06-more-features-1284x2778.png",
+      "sizes": "1284x2778",
+      "type": "image/png"
     }
   ],
   "start_url": "/?source=pwa",

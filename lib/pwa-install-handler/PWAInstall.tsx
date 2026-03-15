@@ -23,9 +23,9 @@ export default function PWAInstallWrapper() {
       ref={(el: any) => {
         pwaInstallElement = el;
       }}
-      install-description="Cài đặt ứng dụng Lịch Vạn Niên để có trải nghiệm tốt hơn!"
-      name="Lịch Vạn Niên"
-      description="Xem lịch âm dương, ngày tốt xấu, giờ hoàng đạo mỗi ngày."
+      install-description="Install the King of English app to have a better experience!"
+      name="King of English"
+      description="Test your vocabulary skills with this engaging quiz app. Learn, compete, and become the king!"
       icon="/images/icon.png"
       manifest-url="/manifest.json"
     />

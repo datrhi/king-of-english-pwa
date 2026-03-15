@@ -37,9 +37,12 @@ const features = [
 ];
 
 const screenshots = [
-  { src: "/images/home_screenshot.jpg", alt: "Home screen" },
-  { src: "/images/join_screenshot.jpg", alt: "Join a room" },
-  { src: "/images/lobby_screenshot.jpg", alt: "Game lobby" },
+  { src: "/screenshots/01-hero-1284x2778.png", alt: "Hero" },
+  { src: "/screenshots/02-multiplayer-1284x2778.png", alt: "Multiplayer" },
+  { src: "/screenshots/03-quiz-1284x2778.png", alt: "Quiz Battles" },
+  { src: "/screenshots/04-word-details-1284x2778.png", alt: "Word Details" },
+  { src: "/screenshots/05-leaderboard-1284x2778.png", alt: "Leaderboard" },
+  { src: "/screenshots/06-more-features-1284x2778.png", alt: "More Features" },
 ];
 
 export default function InstallIntroduction() {
