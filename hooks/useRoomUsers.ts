@@ -1,6 +1,7 @@
-import { useTransitionRouter } from "@/lib/next-view-transitions";
+import { useNavigation, useRoute } from "@/lib/navigation";
 import { useDialog } from "@/providers/DialogProvider";
 import {
+  disconnectRoomSocket,
   emitGetRoomUsers,
   offRoomClosed,
   offRoomUsers,
@@ -19,15 +20,14 @@ import {
   userIdAtom,
 } from "@/stores/gameStore";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 export const useRoomUsers = () => {
-  const searchParams = useSearchParams();
-  const pin = searchParams.get("pin");
+  const { params } = useRoute();
+  const pin = params?.pin as string | undefined;
   const setUserId = useSetAtom(userIdAtom);
   const { showAlert } = useDialog();
-  const router = useTransitionRouter();
+  const navigation = useNavigation();
   const initUsers = useSetAtom(handleInitUsers);
   const addUser = useSetAtom(handleAddUser);
   const removeUser = useSetAtom(handleRemoveUser);
@@ -60,9 +60,11 @@ export const useRoomUsers = () => {
       if (isGameOverRef.current) {
         return;
       }
+      // Room is already closed server-side; disconnect client socket immediately
+      disconnectRoomSocket();
       showAlert({
         content: data.message,
-        onConfirm: () => router.reset("/?source=pwa"),
+        onConfirm: () => navigation.reset({ routes: [{ name: "Home" }] }),
         title: "Room Closed",
         disableBackdropClick: true,
       });

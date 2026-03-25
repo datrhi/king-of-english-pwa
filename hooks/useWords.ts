@@ -1,6 +1,6 @@
+import { useRoute } from "@/lib/navigation";
 import { wordsApi, type GetWordsParams } from "@/services/wordsApi";
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "next/navigation";
 
 export const useWords = (exerciseId: string, params?: GetWordsParams) => {
   return useQuery({
@@ -11,8 +11,8 @@ export const useWords = (exerciseId: string, params?: GetWordsParams) => {
 };
 
 export const useRandomWords = (exerciseId: string, count: number = 10) => {
-  const searchParams = useSearchParams();
-  const isHost = searchParams.get("isHost") === "true";
+  const { params } = useRoute();
+  const isHost = params?.isHost === "true";
   return useQuery({
     queryKey: ["randomWords", exerciseId, count],
     queryFn: () => wordsApi.getRandomWords(exerciseId, count),

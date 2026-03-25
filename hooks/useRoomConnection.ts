@@ -1,5 +1,5 @@
 import { disconnectRoomSocket, leaveRoom } from "@/services/socketService";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 interface UseRoomConnectionOptions {
   pin: string;
@@ -10,47 +10,55 @@ interface UseRoomConnectionOptions {
   persistOnNavigation?: boolean;
 }
 
+function cleanupRoom(pin: string) {
+  leaveRoom(pin);
+  disconnectRoomSocket();
+  sessionStorage.removeItem("inGameSession");
+}
+
 /**
- * Hook to manage WebSocket room connection lifecycle
- * Handles proper cleanup on reload, navigation, and intentional exits
+ * Hook to manage WebSocket room connection lifecycle.
+ * Handles cleanup on: unmount, page close, app background, and app kill.
  */
 export const useRoomConnection = (options: UseRoomConnectionOptions) => {
   const { pin, persistOnNavigation = false } = options;
   const isExitingRef = useRef(false);
+  const pinRef = useRef(pin);
+  pinRef.current = pin;
 
   useEffect(() => {
-    // Mark that we're in an active game session
     sessionStorage.setItem("inGameSession", "true");
 
-    // Handle page reload/close - always disconnect from socket
-    const handleBeforeUnload = () => {
-      leaveRoom(pin);
-      disconnectRoomSocket();
-      sessionStorage.removeItem("inGameSession");
+    const handleBeforeUnload = () => cleanupRoom(pinRef.current);
+
+    // pagehide is more reliable than beforeunload on mobile Safari/PWA
+    const handlePageHide = () => cleanupRoom(pinRef.current);
+
+    // Mobile PWA: disconnect when app goes to background
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        cleanupRoom(pinRef.current);
+      }
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("pagehide", handlePageHide);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    // Cleanup when component unmounts
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("pagehide", handlePageHide);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
 
-      // Only leave room if we're intentionally exiting
-      // or if we're not persisting on navigation
       if (isExitingRef.current || !persistOnNavigation) {
-        leaveRoom(pin);
-        disconnectRoomSocket();
-        sessionStorage.removeItem("inGameSession");
+        cleanupRoom(pinRef.current);
       }
     };
   }, [pin, persistOnNavigation]);
 
-  /**
-   * Call this before navigating away to properly leave the room
-   */
-  const markAsExiting = () => {
+  const markAsExiting = useCallback(() => {
     isExitingRef.current = true;
-  };
+  }, []);
 
   return { markAsExiting };
 };

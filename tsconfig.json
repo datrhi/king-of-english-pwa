@@ -30,7 +30,9 @@
       "@/hooks/*": ["hooks/*"],
       "@/providers/*": ["providers/*"],
       "@/stores/*": ["stores/*"],
-      "@/types/*": ["types/*"]
+      "@/types/*": ["types/*"],
+      "@/screens": ["screens/index"],
+      "@/screens/*": ["screens/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

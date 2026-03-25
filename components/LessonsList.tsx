@@ -1,7 +1,7 @@
 "use client";
 
 import { useLessons } from "@/hooks/useLessons";
-import { useTransitionRouter } from "@/lib/next-view-transitions";
+import { useNavigation } from "@/lib/navigation";
 import type { Lesson } from "@/services/lessonsApi";
 import { shimmer, toBase64 } from "@/utils/shimmer";
 import {
@@ -26,7 +26,7 @@ export default function LessonsList({ courseId }: LessonsListProps) {
   const [sheetOpened, setSheetOpened] = useState(false);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const router = useTransitionRouter();
+  const navigation = useNavigation();
 
   // Fetch lessons from API
   const {
@@ -42,7 +42,7 @@ export default function LessonsList({ courseId }: LessonsListProps) {
 
   const handleViewExercises = () => {
     if (selectedLesson) {
-      router.push(`/exercises?lesson=${selectedLesson.id}`);
+      navigation.push("Exercises", { lesson: selectedLesson.id });
     }
   };
 

@@ -2,7 +2,7 @@
 
 import { useExercises } from "@/hooks/useExercises";
 import { useCreateRoom } from "@/hooks/useRooms";
-import { useTransitionRouter } from "@/lib/next-view-transitions";
+import { useNavigation } from "@/lib/navigation";
 import type { Exercise } from "@/services/exercisesApi";
 import { shimmer, toBase64 } from "@/utils/shimmer";
 import {
@@ -29,7 +29,7 @@ export default function ExercisesList({ lessonId }: ExercisesListProps) {
     null
   );
   const [searchQuery, setSearchQuery] = useState("");
-  const router = useTransitionRouter();
+  const navigation = useNavigation();
 
   // Fetch exercises from API
   const {
@@ -61,12 +61,10 @@ export default function ExercisesList({ lessonId }: ExercisesListProps) {
 
       console.log("Room created:", room);
 
-      // Navigate to lobby - the lobby page will handle joining via WebSocket
-      const params = new URLSearchParams({
+      navigation.push("Lobby", {
         pin: room.pinCode,
         isHost: "true",
       });
-      router.push(`/lobby?${params.toString()}`);
     } catch (error) {
       console.error("Error creating room:", error);
       alert("Failed to create room. Please try again.");

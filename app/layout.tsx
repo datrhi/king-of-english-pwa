@@ -1,5 +1,4 @@
 import KonstaWrapper from "@/components/KonstaWrapper";
-import { ViewTransitions } from "@/lib/next-view-transitions";
 import { DialogProvider } from "@/providers/DialogProvider";
 import QueryProvider from "@/providers/QueryProvider";
 import { Provider } from "jotai";
@@ -54,16 +53,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <Provider>
       <KonstaWrapper>
-        <ViewTransitions>
-          <QueryProvider>
-            <DialogProvider>
-              <html lang="en" dir="ltr">
-                <Head />
-                <body data-mode="light">{children}</body>
-              </html>
-            </DialogProvider>
-          </QueryProvider>
-        </ViewTransitions>
+        <QueryProvider>
+          <DialogProvider>
+            <html lang="en" dir="ltr">
+              <Head />
+              <body data-mode="light">{children}</body>
+            </html>
+          </DialogProvider>
+        </QueryProvider>
       </KonstaWrapper>
     </Provider>
   );

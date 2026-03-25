@@ -1,63 +1,25 @@
 "use client";
-
-import { useSearchParams } from "next/navigation";
-import ExercisesList from "@/components/ExercisesList";
-import ScreenWithBackground from "@/components/ScreenWithBackground";
+import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { Preloader } from "konsta/react";
 
-function ExercisesPageContent() {
+function ExercisesRedirectContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const lessonId = searchParams.get("lesson");
 
-  if (!lessonId) {
-    return (
-      <ScreenWithBackground
-        headerProps={{
-          title: "Exercises",
-        }}
-        view="scrollable"
-        contentPosition="center"
-      >
-        <div className="w-full flex flex-col items-center justify-center py-20 px-4">
-          <p className="text-red-500 text-center">
-            No lesson selected. Please go back and select a lesson.
-          </p>
-        </div>
-      </ScreenWithBackground>
-    );
-  }
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("screen", "Exercises");
+    router.replace(`/pwa/mobile?${params.toString()}`);
+  }, [router, searchParams]);
 
-  return (
-    <ScreenWithBackground
-      headerProps={{
-        title: "Exercises",
-      }}
-      view="scrollable"
-      contentPosition="start"
-    >
-      <ExercisesList lessonId={lessonId} />
-    </ScreenWithBackground>
-  );
+  return null;
 }
 
-export default function ExercisesPage() {
+export default function ExercisesRedirect() {
   return (
-    <Suspense fallback={
-      <ScreenWithBackground
-        headerProps={{
-          title: "Exercises",
-        }}
-        view="scrollable"
-        contentPosition="center"
-      >
-        <div className="w-full flex items-center justify-center py-20">
-          <Preloader />
-        </div>
-      </ScreenWithBackground>
-    }>
-      <ExercisesPageContent />
+    <Suspense>
+      <ExercisesRedirectContent />
     </Suspense>
   );
 }
-

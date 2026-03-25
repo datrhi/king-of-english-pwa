@@ -1,7 +1,7 @@
 "use client";
 
 import { useCourses } from "@/hooks/useCourses";
-import { useTransitionRouter } from "@/lib/next-view-transitions";
+import { useNavigation } from "@/lib/navigation";
 import type { Course } from "@/services/coursesApi";
 import {
   Block,
@@ -20,7 +20,7 @@ export default function CourseList() {
   const [sheetOpened, setSheetOpened] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const router = useTransitionRouter();
+  const navigation = useNavigation();
 
   // Fetch courses from API
   const { data: courses, isLoading, error } = useCourses({ sortBy: "name" });
@@ -32,7 +32,7 @@ export default function CourseList() {
 
   const handleViewLessons = () => {
     if (selectedCourse) {
-      router.push(`/lessons?course=${selectedCourse.id}`);
+      navigation.push("Lessons", { course: selectedCourse.id });
     }
   };
 

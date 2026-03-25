@@ -1,63 +1,25 @@
 "use client";
-
-import LessonsList from "@/components/LessonsList";
-import ScreenWithBackground from "@/components/ScreenWithBackground";
-import { Preloader } from "konsta/react";
-import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
-function LessonsPageContent() {
+function LessonsRedirectContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const courseId = searchParams.get("course");
 
-  if (!courseId) {
-    return (
-      <ScreenWithBackground
-        headerProps={{
-          title: "Lessons",
-        }}
-        view="scrollable"
-        contentPosition="center"
-      >
-        <div className="w-full flex flex-col items-center justify-center py-20 px-4">
-          <p className="text-red-500 text-center">
-            No course selected. Please go back and select a course.
-          </p>
-        </div>
-      </ScreenWithBackground>
-    );
-  }
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("screen", "Lessons");
+    router.replace(`/pwa/mobile?${params.toString()}`);
+  }, [router, searchParams]);
 
-  return (
-    <ScreenWithBackground
-      headerProps={{
-        title: "Lessons",
-      }}
-      view="scrollable"
-      contentPosition="start"
-    >
-      <LessonsList courseId={courseId} />
-    </ScreenWithBackground>
-  );
+  return null;
 }
 
-export default function LessonsPage() {
+export default function LessonsRedirect() {
   return (
-    <Suspense fallback={
-      <ScreenWithBackground
-        headerProps={{
-          title: "Lessons",
-        }}
-        view="scrollable"
-        contentPosition="center"
-      >
-        <div className="w-full flex items-center justify-center py-20">
-          <Preloader />
-        </div>
-      </ScreenWithBackground>
-    }>
-      <LessonsPageContent />
+    <Suspense>
+      <LessonsRedirectContent />
     </Suspense>
   );
 }
-

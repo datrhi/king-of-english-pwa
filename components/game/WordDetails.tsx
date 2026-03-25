@@ -7,7 +7,7 @@ import { Question } from "@/types/game";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAtomValue } from "jotai";
 import { ChevronRight, Volume2 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useRoute } from "@/lib/navigation";
 import { useRef } from "react";
 
 interface WordDetailsProps {
@@ -135,7 +135,8 @@ export function GameWordDetails({
   const showWordDetails = useAtomValue(showWordDetailsAtom);
   const currentQuestionIndex = useAtomValue(currentQuestionIndexAtom);
   const { emitEvent } = useEmitRoomEvent();
-  const isHost = useSearchParams().get("isHost") === "true";
+  const { params } = useRoute();
+  const isHost = params?.isHost === "true";
   // Handle show leaderboard - host emits event, everyone reacts
   const handleShowLeaderboard = () => {
     emitEvent(RoomEvent.SHOW_LEADERBOARD);

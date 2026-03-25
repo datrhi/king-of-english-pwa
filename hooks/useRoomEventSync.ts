@@ -3,7 +3,7 @@ import {
   offRoomEvent,
   onRoomEvent,
 } from "@/services/socketService";
-import { useSearchParams } from "next/navigation";
+import { useRoute } from "@/lib/navigation";
 import { useCallback, useEffect, useRef } from "react";
 
 export interface RoomEventData {
@@ -60,9 +60,9 @@ export function useRoomEventSync({
 }
 
 export function useEmitRoomEvent() {
-  const searchParams = useSearchParams();
-  const pin = searchParams.get("pin") || "000000";
-  const isHost = searchParams.get("isHost") === "true";
+  const { params } = useRoute();
+  const pin = params?.pin || "000000";
+  const isHost = params?.isHost === "true";
   const emitEvent = useCallback(
     (action: string, data?: unknown) => {
       if (!isHost) {

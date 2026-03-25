@@ -78,7 +78,7 @@
       "type": "image/png"
     }
   ],
-  "start_url": "/?source=pwa",
+  "start_url": "/pwa/mobile",
   "orientation": "portrait",
   "display": "standalone",
   "theme_color": "#0a305a",
